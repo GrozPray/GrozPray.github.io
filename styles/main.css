@@ -1,4 +1,3 @@
-/* Основные стили */
 :root {
     --primary: #2E8B57;
     --secondary: #D4AF37;
@@ -79,6 +78,38 @@ nav a.active, nav a:hover {
     padding: 20px;
     margin-bottom: 20px;
     box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+/* Время намаза */
+.prayer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.prayer-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
+    background: #F8F9FA;
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.prayer-item.current-prayer {
+    background: rgba(46, 139, 87, 0.2);
+    border: 2px solid var(--primary);
+}
+
+.prayer-name {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.prayer-time {
+    font-size: 1.2em;
+    font-weight: bold;
 }
 
 /* Подвал */
