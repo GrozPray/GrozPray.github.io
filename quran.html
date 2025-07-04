@@ -4,54 +4,91 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GrozPray – Коран</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Open+Sans:wght@400;600&display=swap">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Open+Sans:wght@400;600&display=swap">
 </head>
 <body>
     <div class="container">
         <header>
-            <div class="logo">
-                <img src="https://via.placeholder.com/50x50" alt="Логотип" class="logo-img">
-                <h1>GrozPray</h1>
-            </div>
-            <p class="slogan">Чтение и прослушивание Корана</p>
+            <h1>📖 Коран</h1>
+            <p>Чтение и прослушивание</p>
         </header>
         
         <nav>
             <a href="index.html">🕋 Намаз</a>
             <a href="quran.html" class="active">📖 Коран</a>
             <a href="dhikr.html">📿 Зикры</a>
-            <a href="calendar.html">📅 Календарь</a>
         </nav>
 
         <main>
             <section class="card">
-                <h2>Сура Аль-Фатиха</h2>
-                <div class="surah-container">
-                    <div dir="rtl" lang="ar" class="arabic-text">
-                        بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ ﴿١﴾ ٱلْحَمْدُ لِلَّٰهِ رَبِّ ٱلْعَٰلَمِينَ ﴿٢﴾
-                    </div>
-                    <p class="translation">
-                        <b>1.</b> Во имя Аллаха, Милостивого, Милосердного!<br>
-                        <b>2.</b> Хвала Аллаху, Господу миров.
-                    </p>
-                    <audio controls class="audio-player">
-                        <source src="https://server.mp3quran.net/suras/001.mp3" type="audio/mpeg">
-                        Ваш браузер не поддерживает аудио.
-                    </audio>
+                <h2>Выберите суру</h2>
+                <div class="surahs-list" id="surahs-list">
+                    <!-- Сюда загрузим список сур -->
+                    <p>Загрузка...</p>
                 </div>
             </section>
 
-            <section class="card">
-                <h2>Поиск по Корану</h2>
-                <input type="text" placeholder="Введите название суры..." class="search-input">
-                <button class="search-button">Найти</button>
+            <section class="card" id="ayahs-section" style="display: none;">
+                <h2 id="surah-name">Сура Аль-Фатиха</h2>
+                <div class="ayahs-container" id="ayahs-container">
+                    <!-- Сюда загрузим аяты -->
+                </div>
+                <audio controls id="audio-player"></audio>
+                <button onclick="goBack()">← Назад к списку</button>
             </section>
         </main>
 
         <footer>
-            <p>© 2024 GrozPray | Используется API <a href="https://quran.com" target="_blank">Quran.com</a></p>
+            <p>Источник: <a href="https://quran.com" target="_blank">Quran.com API</a></p>
         </footer>
     </div>
+
+    <script>
+        // Загружаем список всех сур
+        fetch('https://api.quran.com/api/v4/chapters?language=ru')
+            .then(response => response.json())
+            .then(data => {
+                const surahs = data.chapters;
+                let html = '';
+                surahs.forEach(surah => {
+                    html += `
+                        <div class="surah-item" onclick="loadSurah(${surah.id})">
+                            <span class="surah-number">${surah.id}.</span>
+                            <span class="surah-name">${surah.name_arabic} (${surah.name_simple})</span>
+                            <span class="surah-verse">${surah.verses_count} аятов</span>
+                        </div>
+                    `;
+                });
+                document.getElementById('surahs-list').innerHTML = html;
+            });
+
+        // Загружаем аяты выбранной суры
+        function loadSurah(surahId) {
+            fetch(`https://api.quran.com/api/v4/verses/by_chapter/${surahId}?language=ru&words=true`)
+                .then(response => response.json())
+                .then(data => {
+                    const ayahs = data.verses;
+                    let html = '';
+                    ayahs.forEach(ayah => {
+                        html += `
+                            <div class="ayah">
+                                <p class="arabic" dir="rtl" lang="ar">${ayah.text_uthmani}</p>
+                                <p class="translation">${ayah.translations[0].text}</p>
+                            </div>
+                        `;
+                    });
+                    document.getElementById('ayahs-container').innerHTML = html;
+                    document.getElementById('surah-name').textContent = `Сура ${data.chapter.name_simple}`;
+                    document.getElementById('surahs-list').style.display = 'none';
+                    document.getElementById('ayahs-section').style.display = 'block';
+                });
+        }
+
+        function goBack() {
+            document.getElementById('surahs-list').style.display = 'block';
+            document.getElementById('ayahs-section').style.display = 'none';
+        }
+    </script>
 </body>
 </html>
