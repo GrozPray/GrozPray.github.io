@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Ислам для чеченцев</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 20px; }
+        .section { background: #f0f8ff; padding: 15px; margin: 10px; border-radius: 10px; }
+        button { padding: 10px 20px; background: #2c7be5; color: white; border: none; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Добро пожаловать!</h1>
+    
+    <div class="section">
+        <h2>Время намаза в Грозном</h2>
+        <div id="prayer-times">Загрузка...</div>
+    </div>
+
+    <div class="section">
+        <h2>Азан</h2>
+        <button onclick="playAzaan()">Слушать азан</button>
+        <audio id="azaan" src="https://download.quranicaudio.com/azaan/abdul_baset/azan1.mp3"></audio>
+    </div>
+
+    <script>
+        // Время намаза
+        fetch('https://api.aladhan.com/v1/timingsByCity?city=Grozny&country=Russia&method=2')
+            .then(response => response.json())
+            .then(data => {
+                const timings = data.data.timings;
+                document.getElementById('prayer-times').innerHTML = `
+                    <p>Фаджр: ${timings.Fajr}</p>
+                    <p>Зухр: ${timings.Dhuhr}</p>
+                    <p>Аср: ${timings.Asr}</p>
+                    <p>Магриб: ${timings.Maghrib}</p>
+                    <p>Иша: ${timings.Isha}</p>
+                `;
+            });
+
+        // Азан
+        function playAzaan() {
+            document.getElementById('azaan').play();
+        }
+    </script>
+</body>
+</html>
