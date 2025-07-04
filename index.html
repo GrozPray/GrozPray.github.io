@@ -2,26 +2,35 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Ислам для чеченцев</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 20px; }
-        .section { background: #f0f8ff; padding: 15px; margin: 10px; border-radius: 10px; }
-        button { padding: 10px 20px; background: #2c7be5; color: white; border: none; border-radius: 5px; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GrozPray – Время намаза в Грозном</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Добро пожаловать!</h1>
+    <header>
+        <h1>GrozPray</h1>
+        <p>Исламский ресурс для чеченцев</p>
+    </header>
     
-    <div class="section">
-        <h2>Время намаза в Грозном</h2>
-        <div id="prayer-times">Загрузка...</div>
-    </div>
+    <nav>
+        <a href="index.html" class="active">Намаз</a>
+        <a href="quran.html">Коран</a>
+        <a href="dhikr.html">Зикры</a>
+        <a href="calendar.html">Календарь</a>
+    </nav>
 
-    <div class="section">
-        <h2>Азан</h2>
-        <button onclick="playAzaan()">Слушать азан</button>
-        <audio id="azaan" src="https://download.quranicaudio.com/azaan/abdul_baset/azan1.mp3"></audio>
-    </div>
+    <main>
+        <section class="prayer-times">
+            <h2>Время намаза – Грозный</h2>
+            <div id="prayer-times-container">
+                <p>Загрузка...</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2024 GrozPray. Все права защищены.</p>
+    </footer>
 
     <script>
         // Время намаза
@@ -29,19 +38,15 @@
             .then(response => response.json())
             .then(data => {
                 const timings = data.data.timings;
-                document.getElementById('prayer-times').innerHTML = `
-                    <p>Фаджр: ${timings.Fajr}</p>
-                    <p>Зухр: ${timings.Dhuhr}</p>
-                    <p>Аср: ${timings.Asr}</p>
-                    <p>Магриб: ${timings.Maghrib}</p>
-                    <p>Иша: ${timings.Isha}</p>
+                document.getElementById('prayer-times-container').innerHTML = `
+                    <p><b>Фаджр:</b> ${timings.Fajr}</p>
+                    <p><b>Восход:</b> ${timings.Sunrise}</p>
+                    <p><b>Зухр:</b> ${timings.Dhuhr}</p>
+                    <p><b>Аср:</b> ${timings.Asr}</p>
+                    <p><b>Магриб:</b> ${timings.Maghrib}</p>
+                    <p><b>Иша:</b> ${timings.Isha}</p>
                 `;
             });
-
-        // Азан
-        function playAzaan() {
-            document.getElementById('azaan').play();
-        }
     </script>
 </body>
 </html>
