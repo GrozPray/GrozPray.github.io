@@ -4,48 +4,63 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GrozPray – Время намаза в Грозном</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Open+Sans:wght@400;600&display=swap">
     <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
-    <header>
-        <h1>GrozPray</h1>
-        <p>Исламский ресурс для чеченцев</p>
-    </header>
-    
-    <nav>
-        <a href="index.html" class="active">Намаз</a>
-        <a href="quran.html">Коран</a>
-        <a href="dhikr.html">Зикры</a>
-        <a href="calendar.html">Календарь</a>
-    </nav>
-
-    <main>
-        <section class="prayer-times">
-            <h2>Время намаза – Грозный</h2>
-            <div id="prayer-times-container">
-                <p>Загрузка...</p>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <img src="https://via.placeholder.com/50x50" alt="Логотип" class="logo-img">
+                <h1>GrozPray</h1>
             </div>
-        </section>
-    </main>
+            <p class="slogan">Ваш помощник в поклонении</p>
+        </header>
+        
+        <nav>
+            <a href="index.html" class="active">🕋 Намаз</a>
+            <a href="quran.html">📖 Коран</a>
+            <a href="dhikr.html">📿 Зикры</a>
+            <a href="calendar.html">📅 Календарь</a>
+        </nav>
 
-    <footer>
-        <p>© 2024 GrozPray. Все права защищены.</p>
-    </footer>
+        <main>
+            <section class="prayer-times card">
+                <h2>⏳ Время намаза – Грозный</h2>
+                <div class="prayer-grid" id="prayer-times-container">
+                    <div class="prayer-item">
+                        <span class="prayer-name">Фаджр</span>
+                        <span class="prayer-time" id="fajr">--:--</span>
+                    </div>
+                    <div class="prayer-item">
+                        <span class="prayer-name">Зухр</span>
+                        <span class="prayer-time" id="dhuhr">--:--</span>
+                    </div>
+                    <!-- Остальные времена -->
+                </div>
+            </section>
+
+            <section class="daily-ayah card">
+                <h2>🌙 Аят дня</h2>
+                <div class="ayah-text" dir="rtl" lang="ar">وَذَكَرَ ٱسْمَ رَبِّهِۦ فَصَلَّىٰ</div>
+                <p class="translation">"Он помянул имя Господа своего и помолился." (Коран, 87:15)</p>
+            </section>
+        </main>
+
+        <footer>
+            <p>© 2024 GrozPray | Сделано с ❤️ для мусульман</p>
+        </footer>
+    </div>
 
     <script>
-        // Время намаза
         fetch('https://api.aladhan.com/v1/timingsByCity?city=Grozny&country=Russia&method=2')
             .then(response => response.json())
             .then(data => {
                 const timings = data.data.timings;
-                document.getElementById('prayer-times-container').innerHTML = `
-                    <p><b>Фаджр:</b> ${timings.Fajr}</p>
-                    <p><b>Восход:</b> ${timings.Sunrise}</p>
-                    <p><b>Зухр:</b> ${timings.Dhuhr}</p>
-                    <p><b>Аср:</b> ${timings.Asr}</p>
-                    <p><b>Магриб:</b> ${timings.Maghrib}</p>
-                    <p><b>Иша:</b> ${timings.Isha}</p>
-                `;
+                document.getElementById('fajr').textContent = timings.Fajr;
+                document.getElementById('dhuhr').textContent = timings.Dhuhr;
+                // Добавьте остальные времена
             });
     </script>
 </body>
