@@ -3,16 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GrozPray – Время намаза в Грозном</title>
-    <link rel="stylesheet" href="/styles/main.css">
-        <link rel="stylesheet" href="/styles/index.css">
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <title>GrozPray - Время намаза в Грозном</title>
+    <!-- Подключение стилей -->
+    <link rel="stylesheet" href="styles/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        /* Дополнительные стили для главной страницы */
+        .prayer-times {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .prayer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .prayer-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: transform 0.3s;
+        }
+        
+        .prayer-item:hover {
+            transform: translateY(-3px);
+        }
+        
+        .prayer-name {
+            color: #2E8B57;
+            font-weight: 600;
+        }
+        
+        .prayer-time {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 600px) {
+            .prayer-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <header>
             <div class="logo">
-                <img src="https://via.placeholder.com/50x50" alt="Логотип" class="logo-img">
+                <img src="https://via.placeholder.com/50x50/2E8B57/FFFFFF?text=GP" alt="Логотип" class="logo-img">
                 <h1>GrozPray</h1>
             </div>
             <p class="slogan">Ваш помощник в поклонении</p>
@@ -22,29 +66,45 @@
             <a href="index.html" class="active">🕋 Намаз</a>
             <a href="quran.html">📖 Коран</a>
             <a href="dhikr.html">📿 Зикры</a>
-            <a href="calendar.html">📅 Календарь</a>
         </nav>
 
         <main>
             <section class="prayer-times card">
-                <h2>⏳ Время намаза – Грозный</h2>
+                <h2>⏳ Время намаза - Грозный</h2>
                 <div class="prayer-grid" id="prayer-times-container">
+                    <!-- Время намаза будет загружено через API -->
                     <div class="prayer-item">
-                        <span class="prayer-name">Фаджр</span>
-                        <span class="prayer-time" id="fajr">--:--</span>
+                        <div class="prayer-name">Фаджр</div>
+                        <div class="prayer-time" id="fajr">--:--</div>
                     </div>
                     <div class="prayer-item">
-                        <span class="prayer-name">Зухр</span>
-                        <span class="prayer-time" id="dhuhr">--:--</span>
+                        <div class="prayer-name">Восход</div>
+                        <div class="prayer-time" id="sunrise">--:--</div>
                     </div>
-                    <!-- Остальные времена -->
+                    <div class="prayer-item">
+                        <div class="prayer-name">Зухр</div>
+                        <div class="prayer-time" id="dhuhr">--:--</div>
+                    </div>
+                    <div class="prayer-item">
+                        <div class="prayer-name">Аср</div>
+                        <div class="prayer-time" id="asr">--:--</div>
+                    </div>
+                    <div class="prayer-item">
+                        <div class="prayer-name">Магриб</div>
+                        <div class="prayer-time" id="maghrib">--:--</div>
+                    </div>
+                    <div class="prayer-item">
+                        <div class="prayer-name">Иша</div>
+                        <div class="prayer-time" id="isha">--:--</div>
+                    </div>
                 </div>
             </section>
 
-            <section class="daily-ayah card">
-                <h2>🌙 Аят дня</h2>
-                <div class="ayah-text" dir="rtl" lang="ar">وَذَكَرَ ٱسْمَ رَبِّهِۦ فَصَلَّىٰ</div>
-                <p class="translation">"Он помянул имя Господа своего и помолился." (Коран, 87:15)</p>
+            <section class="card">
+                <h2>📅 Сегодня</h2>
+                <div id="hijri-date">
+                    Загрузка исламской даты...
+                </div>
             </section>
         </main>
 
@@ -54,13 +114,28 @@
     </div>
 
     <script>
+        // Загрузка времени намаза
         fetch('https://api.aladhan.com/v1/timingsByCity?city=Grozny&country=Russia&method=2')
             .then(response => response.json())
             .then(data => {
                 const timings = data.data.timings;
                 document.getElementById('fajr').textContent = timings.Fajr;
+                document.getElementById('sunrise').textContent = timings.Sunrise;
                 document.getElementById('dhuhr').textContent = timings.Dhuhr;
-                // Добавьте остальные времена
+                document.getElementById('asr').textContent = timings.Asr;
+                document.getElementById('maghrib').textContent = timings.Maghrib;
+                document.getElementById('isha').textContent = timings.Isha;
+            });
+
+        // Загрузка исламской даты
+        fetch('https://api.aladhan.com/v1/gToH?date=' + new Date().toISOString().split('T')[0])
+            .then(response => response.json())
+            .then(data => {
+                const hijri = data.data.hijri;
+                document.getElementById('hijri-date').innerHTML = `
+                    <p>${hijri.day} ${hijri.month.en} ${hijri.year} г.х.</p>
+                    <p>${hijri.weekday.en}</p>
+                `;
             });
     </script>
 </body>
