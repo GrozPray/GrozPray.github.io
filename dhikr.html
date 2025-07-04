@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GrozPray – Зикры и Дуа</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Open+Sans:wght@400;600&display=swap">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <img src="https://via.placeholder.com/50x50" alt="Лого" class="logo-img">
+                <h1>GrozPray</h1>
+            </div>
+            <p class="slogan">Поминание Аллаха</p>
+        </header>
+        
+        <nav>
+            <a href="index.html">🕋 Намаз</a>
+            <a href="quran.html">📖 Коран</a>
+            <a href="dhikr.html" class="active">📿 Зикры</a>
+        </nav>
+
+        <main>
+            <!-- Блок с категориями зикров -->
+            <section class="card">
+                <h2>Категории зикров</h2>
+                <div class="categories">
+                    <button class="category-btn active" data-category="morning">Утренние</button>
+                    <button class="category-btn" data-category="evening">Вечерние</button>
+                    <button class="category-btn" data-category="after-prayer">После намаза</button>
+                </div>
+            </section>
+
+            <!-- Контейнер для зикров -->
+            <section class="card">
+                <div class="dhikr-item">
+                    <div class="dhikr-arabic" dir="rtl" lang="ar">
+                        سُبْحَانَ اللَّهِ وَبِحَمْدِهِ
+                    </div>
+                    <div class="dhikr-translation">
+                        Субханаллахи ва бихамдих
+                    </div>
+                    <div class="dhikr-meaning">
+                        Преславен Аллах и хвала Ему
+                    </div>
+                    <div class="counter">
+                        <button class="counter-btn minus">−</button>
+                        <span class="count">0</span>
+                        <button class="counter-btn plus">+</button>
+                        <span class="times">раз</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>© 2024 GrozPray | Источник: «Крепость мусульманина»</p>
+        </footer>
+    </div>
+
+    <script>
+        // Здесь будет логика для зикров
+        document.querySelectorAll('.counter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const counter = this.parentElement.querySelector('.count');
+                let count = parseInt(counter.textContent);
+                if (this.classList.contains('plus')) {
+                    count++;
+                } else if (count > 0) {
+                    count--;
+                }
+                counter.textContent = count;
+            });
+        });
+    </script>
+</body>
+</html>
