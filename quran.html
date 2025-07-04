@@ -1,94 +1,44 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GrozPray – Коран</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Open+Sans:wght@400;600&display=swap">
-</head>
-<body>
-    <div class="container">
-        <header>
-            <h1>📖 Коран</h1>
-            <p>Чтение и прослушивание</p>
-        </header>
-        
-        <nav>
-            <a href="index.html">🕋 Намаз</a>
-            <a href="quran.html" class="active">📖 Коран</a>
-            <a href="dhikr.html">📿 Зикры</a>
-        </nav>
+<div class="quran-container">
+  <select id="surah-select" class="surah-dropdown">
+    <option value="">Выберите суру...</option>
+    <!-- СурЫ загрузятся автоматически -->
+  </select>
+  
+  <div id="ayahs-container" class="ayahs-box">
+    <!-- Здесь появятся аяты -->
+  </div>
+  
+  <audio id="audio-player" controls></audio>
+</div>
 
-        <main>
-            <section class="card">
-                <h2>Выберите суру</h2>
-                <div class="surahs-list" id="surahs-list">
-                    <!-- Сюда загрузим список сур -->
-                    <p>Загрузка...</p>
-                </div>
-            </section>
+<script>
+// Загружаем список сур
+fetch('https://api.alquran.cloud/v1/surah')
+  .then(r => r.json())
+  .then(data => {
+    const select = document.getElementById('surah-select');
+    data.data.forEach(surah => {
+      select.innerHTML += `<option value="${surah.number}">${surah.englishName} (${surah.name})</option>`;
+    });
+  });
 
-            <section class="card" id="ayahs-section" style="display: none;">
-                <h2 id="surah-name">Сура Аль-Фатиха</h2>
-                <div class="ayahs-container" id="ayahs-container">
-                    <!-- Сюда загрузим аяты -->
-                </div>
-                <audio controls id="audio-player"></audio>
-                <button onclick="goBack()">← Назад к списку</button>
-            </section>
-        </main>
-
-        <footer>
-            <p>Источник: <a href="https://quran.com" target="_blank">Quran.com API</a></p>
-        </footer>
-    </div>
-
-    <script>
-        // Загружаем список всех сур
-        fetch('https://api.quran.com/api/v4/chapters?language=ru')
-            .then(response => response.json())
-            .then(data => {
-                const surahs = data.chapters;
-                let html = '';
-                surahs.forEach(surah => {
-                    html += `
-                        <div class="surah-item" onclick="loadSurah(${surah.id})">
-                            <span class="surah-number">${surah.id}.</span>
-                            <span class="surah-name">${surah.name_arabic} (${surah.name_simple})</span>
-                            <span class="surah-verse">${surah.verses_count} аятов</span>
-                        </div>
-                    `;
-                });
-                document.getElementById('surahs-list').innerHTML = html;
-            });
-
-        // Загружаем аяты выбранной суры
-        function loadSurah(surahId) {
-            fetch(`https://api.quran.com/api/v4/verses/by_chapter/${surahId}?language=ru&words=true`)
-                .then(response => response.json())
-                .then(data => {
-                    const ayahs = data.verses;
-                    let html = '';
-                    ayahs.forEach(ayah => {
-                        html += `
-                            <div class="ayah">
-                                <p class="arabic" dir="rtl" lang="ar">${ayah.text_uthmani}</p>
-                                <p class="translation">${ayah.translations[0].text}</p>
-                            </div>
-                        `;
-                    });
-                    document.getElementById('ayahs-container').innerHTML = html;
-                    document.getElementById('surah-name').textContent = `Сура ${data.chapter.name_simple}`;
-                    document.getElementById('surahs-list').style.display = 'none';
-                    document.getElementById('ayahs-section').style.display = 'block';
-                });
-        }
-
-        function goBack() {
-            document.getElementById('surahs-list').style.display = 'block';
-            document.getElementById('ayahs-section').style.display = 'none';
-        }
-    </script>
-</body>
-</html>
+// Загружаем аяты при выборе суры
+document.getElementById('surah-select').addEventListener('change', function() {
+  const surahNum = this.value;
+  fetch(`https://api.alquran.cloud/v1/surah/${surahNum}/ru.kuliev`)
+    .then(r => r.json())
+    .then(data => {
+      let html = '';
+      data.data.ayahs.forEach(ayah => {
+        html += `
+          <div class="ayah">
+            <p class="arabic" dir="rtl">${ayah.text}</p>
+            <p class="translation">${ayah.translation}</p>
+          </div>
+        `;
+      });
+      document.getElementById('ayahs-container').innerHTML = html;
+      document.getElementById('audio-player').src = `https://server.mp3quran.net/abdulbaset/murattal/${surahNum}.mp3`;
+    });
+});
+</script>
