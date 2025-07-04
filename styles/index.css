@@ -1,0 +1,30 @@
+/* Стили ТОЛЬКО для главной страницы (index.html) */
+
+/* Блок времени намаза */
+.prayer-times {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.prayer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.prayer-item {
+    text-align: center;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+/* Адаптивность */
+@media (max-width: 600px) {
+    .prayer-grid {
+        grid-template-columns: 1fr;
+    }
+}
