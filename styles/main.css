@@ -1,15 +1,11 @@
-/* Общие стили для всех страниц */
-:root {
-    --primary: #2E8B57;
-    --secondary: #D4AF37;
-    --dark: #1A3A2F;
-    --light: #F5F5F5;
-}
-
+/* Экстренный сброс стилей */
 body {
     font-family: 'Open Sans', sans-serif;
     margin: 0;
-    background: var(--light);
+    padding: 0;
+    background: #f5f5f5;
+    color: #333;
+    line-height: 1.6;
 }
 
 .container {
@@ -18,15 +14,51 @@ body {
     padding: 20px;
 }
 
-header, nav, footer {
-    background: var(--dark);
+/* Шапка */
+header {
+    background: linear-gradient(135deg, #2E8B57, #1A3A2F);
     color: white;
-    padding: 15px;
+    padding: 20px 0;
     text-align: center;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+/* Меню */
+nav {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
 }
 
 nav a {
     color: white;
-    margin: 0 10px;
+    background: #333;
+    padding: 10px 20px;
+    border-radius: 50px;
     text-decoration: none;
+    transition: 0.3s;
+}
+
+nav a:hover, nav a.active {
+    background: #2E8B57;
+}
+
+/* Карточки */
+.card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+/* Подвал */
+footer {
+    text-align: center;
+    padding: 20px;
+    margin-top: 40px;
+    color: #666;
 }
