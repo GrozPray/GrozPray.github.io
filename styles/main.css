@@ -1,10 +1,18 @@
-/* Экстренный сброс стилей */
+/* Основные стили */
+:root {
+    --primary: #2E8B57;
+    --secondary: #D4AF37;
+    --dark: #1A3A2F;
+    --light: #F5F5F5;
+    --text: #333;
+}
+
 body {
     font-family: 'Open Sans', sans-serif;
+    background-color: var(--light);
+    color: var(--text);
     margin: 0;
     padding: 0;
-    background: #f5f5f5;
-    color: #333;
     line-height: 1.6;
 }
 
@@ -16,34 +24,52 @@ body {
 
 /* Шапка */
 header {
-    background: linear-gradient(135deg, #2E8B57, #1A3A2F);
-    color: white;
-    padding: 20px 0;
     text-align: center;
+    padding: 20px 0;
+    background: linear-gradient(135deg, var(--primary), var(--dark));
+    color: white;
     border-radius: 10px;
     margin-bottom: 20px;
 }
 
-/* Меню */
+.logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.logo-img {
+    border-radius: 50%;
+}
+
+.slogan {
+    font-style: italic;
+    opacity: 0.9;
+}
+
+/* Навигация */
 nav {
     display: flex;
     justify-content: center;
-    gap: 15px;
+    gap: 10px;
     margin-bottom: 30px;
     flex-wrap: wrap;
 }
 
 nav a {
-    color: white;
-    background: #333;
+    color: var(--dark);
+    text-decoration: none;
     padding: 10px 20px;
     border-radius: 50px;
-    text-decoration: none;
-    transition: 0.3s;
+    background: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: all 0.3s;
 }
 
-nav a:hover, nav a.active {
-    background: #2E8B57;
+nav a.active, nav a:hover {
+    background: var(--primary);
+    color: white;
 }
 
 /* Карточки */
@@ -61,4 +87,22 @@ footer {
     padding: 20px;
     margin-top: 40px;
     color: #666;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .prayer-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    nav {
+        flex-direction: column;
+        align-items: center;
+    }
+    nav a {
+        width: 80%;
+        text-align: center;
+    }
 }
