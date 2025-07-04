@@ -1,57 +1,60 @@
-/* Стили для уведомлений */
-.notification-hidden {
-    display: none;
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #2E8B57;
-    color: white;
-    padding: 15px 25px;
+/* Стили ТОЛЬКО для главной страницы (index.html) */
+
+/* Блок времени намаза */
+.prayer-times {
+    background: white;
     border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    z-index: 1000;
-    animation: fadeIn 0.5s;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
 }
 
-.notification-show {
-    display: block;
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #2E8B57;
-    color: white;
-    padding: 15px 25px;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    z-index: 1000;
-    animation: fadeIn 0.5s;
+.prayer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; top: 0; }
-    to { opacity: 1; top: 20px; }
+.prayer-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
+    background: #F8F9FA;
+    border-radius: 8px;
+    transition: all 0.3s;
 }
 
-.notification-show button {
-    background: transparent;
-    border: none;
-    color: white;
-    font-size: 18px;
-    margin-left: 15px;
-    cursor: pointer;
+.prayer-item:hover {
+    transform: translateY(-3px);
 }
 
-/* Стиль для активного намаза */
-.prayer-active {
+.prayer-name {
+    color: #2E8B57;
+    font-weight: 600;
+}
+
+.prayer-time {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+/* Стиль для текущего намаза */
+.prayer-item.current-prayer {
     animation: pulse 2s infinite;
+    border: 2px solid #2E8B57;
     background: rgba(46, 139, 87, 0.1);
-    border: 2px solid #2E8B57 !important;
 }
 
 @keyframes pulse {
     0% { transform: scale(1); }
     50% { transform: scale(1.03); }
     100% { transform: scale(1); }
+}
+
+/* Адаптивность */
+@media (max-width: 600px) {
+    .prayer-grid {
+        grid-template-columns: 1fr;
+    }
 }
