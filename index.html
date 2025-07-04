@@ -80,6 +80,61 @@
                 document.getElementById('maghrib').textContent = timings.Maghrib;
                 document.getElementById('isha').textContent = timings.Isha;
             });
+        // Проверка времени намаза каждую минуту
+setInterval(() => {
+    const now = new Date();
+    const currentTime = now.getHours() + ':' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
+    
+    // Получаем все времена намаза
+    const prayerTimes = {
+        fajr: document.getElementById('fajr').textContent,
+        dhuhr: document.getElementById('dhuhr').textContent,
+        asr: document.getElementById('asr').textContent,
+        maghrib: document.getElementById('maghrib').textContent,
+        isha: document.getElementById('isha').textContent
+    };
+
+    // Проверяем каждый намаз
+    for (const [prayer, time] of Object.entries(prayerTimes)) {
+        if (time === currentTime) {
+            showNotification(prayer);
+        }
+    }
+}, 60000); // Проверка каждую минуту
+
+function showNotification(prayerName) {
+    const prayerNames = {
+        fajr: 'Фаджр',
+        dhuhr: 'Зухр',
+        asr: 'Аср',
+        maghrib: 'Магриб',
+        isha: 'Иша'
+    };
+
+    // Запрашиваем разрешение на уведомления
+    if (Notification.permission === 'granted') {
+        new Notification(`Время намаза ${prayerNames[prayerName]}!`, {
+            body: 'Наступило время обязательного намаза',
+            icon: 'https://via.placeholder.com/64/2E8B57/FFFFFF?text=🕌'
+        });
+    } else if (Notification.permission !== 'denied') {
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                new Notification(`Время намаза ${prayerNames[prayerName]}!`);
+            }
+        });
+    }
+
+    // Дублируем звуком
+    const audio = new Audio('https://www.soundjay.com/buttons/sounds/button-09.mp3');
+    audio.play();
+    
+    // Меняем цвет карточки
+    document.getElementById(prayerName).parentElement.style.background = '#FFEB3B';
+    setTimeout(() => {
+        document.getElementById(prayerName).parentElement.style.background = '';
+    }, 10000);
+}
     </script>
 </body>
 </html>
