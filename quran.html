@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GrozPray – Коран</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Open+Sans:wght@400;600&display=swap">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <img src="https://via.placeholder.com/50x50" alt="Логотип" class="logo-img">
+                <h1>GrozPray</h1>
+            </div>
+            <p class="slogan">Чтение и прослушивание Корана</p>
+        </header>
+        
+        <nav>
+            <a href="index.html">🕋 Намаз</a>
+            <a href="quran.html" class="active">📖 Коран</a>
+            <a href="dhikr.html">📿 Зикры</a>
+            <a href="calendar.html">📅 Календарь</a>
+        </nav>
+
+        <main>
+            <section class="card">
+                <h2>Сура Аль-Фатиха</h2>
+                <div class="surah-container">
+                    <div dir="rtl" lang="ar" class="arabic-text">
+                        بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ ﴿١﴾ ٱلْحَمْدُ لِلَّٰهِ رَبِّ ٱلْعَٰلَمِينَ ﴿٢﴾
+                    </div>
+                    <p class="translation">
+                        <b>1.</b> Во имя Аллаха, Милостивого, Милосердного!<br>
+                        <b>2.</b> Хвала Аллаху, Господу миров.
+                    </p>
+                    <audio controls class="audio-player">
+                        <source src="https://server.mp3quran.net/suras/001.mp3" type="audio/mpeg">
+                        Ваш браузер не поддерживает аудио.
+                    </audio>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>Поиск по Корану</h2>
+                <input type="text" placeholder="Введите название суры..." class="search-input">
+                <button class="search-button">Найти</button>
+            </section>
+        </main>
+
+        <footer>
+            <p>© 2024 GrozPray | Используется API <a href="https://quran.com" target="_blank">Quran.com</a></p>
+        </footer>
+    </div>
+</body>
+</html>
