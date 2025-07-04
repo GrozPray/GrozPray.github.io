@@ -1,0 +1,32 @@
+/* Общие стили для всех страниц */
+:root {
+    --primary: #2E8B57;
+    --secondary: #D4AF37;
+    --dark: #1A3A2F;
+    --light: #F5F5F5;
+}
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    margin: 0;
+    background: var(--light);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header, nav, footer {
+    background: var(--dark);
+    color: white;
+    padding: 15px;
+    text-align: center;
+}
+
+nav a {
+    color: white;
+    margin: 0 10px;
+    text-decoration: none;
+}
