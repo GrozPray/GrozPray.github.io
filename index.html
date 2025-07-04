@@ -6,7 +6,6 @@
     <title>GrozPray - Время намаза в Грозном</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Open+Sans:wght@400;600&display=swap">
     <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/index.css">
 </head>
 <body>
     <div class="container">
@@ -27,34 +26,29 @@
         <main>
             <section class="card">
                 <h2>⏳ Время намаза - Грозный</h2>
-                <div class="prayer-grid" id="prayer-times-container">
-                    <div class="prayer-item" id="fajr-container">
+                <div class="prayer-grid">
+                    <div class="prayer-item" id="fajr-card">
                         <span class="prayer-name">Фаджр</span>
                         <span class="prayer-time" id="fajr">--:--</span>
                     </div>
-                    <div class="prayer-item" id="dhuhr-container">
+                    <div class="prayer-item" id="dhuhr-card">
                         <span class="prayer-name">Зухр</span>
                         <span class="prayer-time" id="dhuhr">--:--</span>
                     </div>
-                    <div class="prayer-item" id="asr-container">
+                    <div class="prayer-item" id="asr-card">
                         <span class="prayer-name">Аср</span>
                         <span class="prayer-time" id="asr">--:--</span>
                     </div>
-                    <div class="prayer-item" id="maghrib-container">
+                    <div class="prayer-item" id="maghrib-card">
                         <span class="prayer-name">Магриб</span>
                         <span class="prayer-time" id="maghrib">--:--</span>
                     </div>
-                    <div class="prayer-item" id="isha-container">
+                    <div class="prayer-item" id="isha-card">
                         <span class="prayer-name">Иша</span>
                         <span class="prayer-time" id="isha">--:--</span>
                     </div>
                 </div>
             </section>
-
-            <div id="notification" class="notification-hidden">
-                <p>Время намаза <span id="current-prayer"></span>!</p>
-                <button onclick="hideNotification()">✕</button>
-            </div>
         </main>
 
         <footer>
@@ -74,37 +68,42 @@
                 document.getElementById('maghrib').textContent = timings.Maghrib;
                 document.getElementById('isha').textContent = timings.Isha;
                 
-                // Запускаем проверку времени
-                startPrayerTimeChecker();
+                checkPrayerTime(); // Первая проверка
+                setInterval(checkPrayerTime, 30000); // Проверка каждые 30 сек
             });
 
         // Проверка времени намаза
-        function startPrayerTimeChecker() {
-            setInterval(() => {
-                const now = new Date();
-                const currentTime = formatTime(now.getHours(), now.getMinutes());
-                
-                const prayers = {
-                    'fajr': document.getElementById('fajr').textContent,
-                    'dhuhr': document.getElementById('dhuhr').textContent,
-                    'asr': document.getElementById('asr').textContent,
-                    'maghrib': document.getElementById('maghrib').textContent,
-                    'isha': document.getElementById('isha').textContent
-                };
+        function checkPrayerTime() {
+            const now = new Date();
+            const currentTime = formatTime(now.getHours(), now.getMinutes());
+            
+            const prayers = {
+                'fajr': document.getElementById('fajr').textContent,
+                'dhuhr': document.getElementById('dhuhr').textContent,
+                'asr': document.getElementById('asr').textContent,
+                'maghrib': document.getElementById('maghrib').textContent,
+                'isha': document.getElementById('isha').textContent
+            };
 
-                for (const [prayer, time] of Object.entries(prayers)) {
-                    if (time === currentTime) {
-                        showPrayerNotification(prayer);
-                    }
+            // Сбрасываем все подсветки
+            document.querySelectorAll('.prayer-item').forEach(item => {
+                item.classList.remove('current-prayer');
+            });
+
+            // Проверяем каждый намаз
+            for (const [prayer, time] of Object.entries(prayers)) {
+                if (time === currentTime) {
+                    showPrayerAlert(prayer);
+                    document.getElementById(`${prayer}-card`).classList.add('current-prayer');
                 }
-            }, 30000); // Проверка каждые 30 секунд
+            }
         }
 
         function formatTime(hours, minutes) {
             return `${hours}:${minutes < 10 ? '0' + minutes : minutes}`;
         }
 
-        function showPrayerNotification(prayer) {
+        function showPrayerAlert(prayer) {
             const prayerNames = {
                 'fajr': 'Фаджр',
                 'dhuhr': 'Зухр',
@@ -112,33 +111,12 @@
                 'maghrib': 'Магриб',
                 'isha': 'Иша'
             };
-
-            // Показываем визуальное уведомление
-            document.getElementById('current-prayer').textContent = prayerNames[prayer];
-            document.getElementById('notification').className = 'notification-show';
             
-            // Подсвечиваем текущий намаз
-            document.getElementById(`${prayer}-container`).classList.add('prayer-active');
-            setTimeout(() => {
-                document.getElementById(`${prayer}-container`).classList.remove('prayer-active');
-            }, 600000); // 10 минут подсветки
-
-            // Браузерные уведомления (если разрешено)
-            if (Notification.permission === 'granted') {
-                new Notification(`Время намаза ${prayerNames[prayer]}!`, {
-                    body: 'Наступило время обязательного намаза',
-                    icon: 'https://via.placeholder.com/64/2E8B57/FFFFFF?text=🕌'
-                });
-            }
-        }
-
-        function hideNotification() {
-            document.getElementById('notification').className = 'notification-hidden';
-        }
-
-        // Запрашиваем разрешение на уведомления при загрузке
-        if (Notification.permission !== 'denied') {
-            Notification.requestPermission();
+            // Простое уведомление в консоли (не мешает дизайну)
+            console.log(`Время намаза ${prayerNames[prayer]}!`);
+            
+            // Можно добавить звук (по желанию)
+            // new Audio('notification.mp3').play();
         }
     </script>
 </body>
