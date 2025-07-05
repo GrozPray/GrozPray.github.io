@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GrozPray - Коран</title>
+    <title>GrozPray - Полный Коран</title>
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/quran.css">
 </head>
@@ -14,7 +14,7 @@
                 <img src="https://via.placeholder.com/50x50/2E8B57/FFFFFF?text=GP" alt="Лого" class="logo-img">
                 <h1>GrozPray</h1>
             </div>
-            <p class="slogan">Чтение Корана</p>
+            <p class="slogan">Полный текст Корана</p>
         </header>
         
         <nav>
@@ -25,81 +25,77 @@
 
         <main>
             <section class="card">
-                <div class="search-box">
-                    <input type="text" id="search-input" placeholder="Найти суру..." oninput="searchSura()">
+                <div class="quick-nav">
+                    <label for="sura-select">Быстрый переход:</label>
+                    <select id="sura-select" onchange="scrollToSura(this.value)">
+                        <option value="">Выберите суру...</option>
+                        <!-- Опции загрузятся через JS -->
+                    </select>
                 </div>
 
-                <div class="sura-list" id="sura-list">
-                    <!-- СурЫ будут загружены здесь -->
-                    <div class="loader">Загрузка списка сур...</div>
+                <div id="full-quran">
+                    <!-- Весь Коран загрузится здесь -->
+                    <div class="loader">Загрузка Корана...</div>
                 </div>
             </section>
         </main>
 
         <footer>
-            <p>© 2024 GrozPray</p>
+            <p>© 2024 GrozPray | Источник: Tanzil.net</p>
         </footer>
     </div>
 
     <script>
-        // Загрузка списка сур
-        fetch('https://api.quran.com/api/v4/chapters?language=ru')
-            .then(response => response.json())
-            .then(data => {
+        // Загрузка всего Корана
+        async function loadFullQuran() {
+            try {
+                const response = await fetch('quran-text.json'); // Локальный файл с текстом
+                const data = await response.json();
+                
                 let html = '';
-                data.chapters.forEach(sura => {
+                const select = document.getElementById('sura-select');
+                
+                data.suras.forEach(sura => {
+                    // Добавляем в select
+                    select.innerHTML += `<option value="sura-${sura.number}">${sura.number}. ${sura.name} (${sura.arabicName})</option>`;
+                    
+                    // Формируем текст суры
                     html += `
-                        <div class="sura-item" data-name="${sura.name_simple.toLowerCase()}">
-                            <div class="sura-header" onclick="loadSura(${sura.id})">
-                                <span class="sura-number">${sura.id}.</span>
-                                <span class="sura-name-arabic">${sura.name_arabic}</span>
-                                <span class="sura-name">${sura.name_simple}</span>
-                                <span class="sura-ayat">${sura.verses_count} аятов</span>
+                        <div class="sura" id="sura-${sura.number}">
+                            <h2 class="sura-title">
+                                <span class="sura-num">${sura.number}.</span>
+                                <span class="sura-name-arabic">${sura.arabicName}</span>
+                                <span class="sura-name">${sura.name}</span>
+                            </h2>
+                            <div class="sura-text">
+                                ${sura.ayats.map(ayat => `
+                                    <div class="ayat">
+                                        <span class="ayat-num">${ayat.number}.</span>
+                                        <p class="arabic" dir="rtl" lang="ar">${ayat.text}</p>
+                                        <p class="translation">${ayat.translation}</p>
+                                    </div>
+                                `).join('')}
                             </div>
-                            <div class="sura-content" id="sura-${sura.id}"></div>
                         </div>
                     `;
                 });
-                document.getElementById('sura-list').innerHTML = html;
-            });
-
-        // Загрузка текста суры
-        function loadSura(suraId) {
-            const suraContent = document.getElementById(`sura-${suraId}`);
-            
-            if (suraContent.innerHTML === '') {
-                suraContent.innerHTML = '<div class="loader">Загрузка...</div>';
                 
-                fetch(`https://api.quran.com/api/v4/verses/by_chapter/${suraId}?language=ru&words=false`)
-                    .then(response => response.json())
-                    .then(data => {
-                        let versesHtml = '';
-                        data.verses.forEach(verse => {
-                            versesHtml += `
-                                <div class="ayah">
-                                    <span class="ayah-number">${verse.verse_number}.</span>
-                                    <p class="ayah-text" dir="rtl" lang="ar">${verse.text_uthmani}</p>
-                                    <p class="translation">${verse.translations[0].text}</p>
-                                </div>
-                            `;
-                        });
-                        suraContent.innerHTML = versesHtml;
-                    });
-            } else {
-                suraContent.innerHTML = '';
+                document.getElementById('full-quran').innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки:', error);
+                document.getElementById('full-quran').innerHTML = '<p class="error">Не удалось загрузить Коран. Попробуйте позже.</p>';
             }
         }
 
-        // Поиск сур
-        function searchSura() {
-            const input = document.getElementById('search-input').value.toLowerCase();
-            const suraItems = document.querySelectorAll('.sura-item');
-            
-            suraItems.forEach(item => {
-                const suraName = item.getAttribute('data-name');
-                item.style.display = suraName.includes(input) ? 'block' : 'none';
-            });
+        // Прокрутка к выбранной суре
+        function scrollToSura(suraId) {
+            if (!suraId) return;
+            const element = document.getElementById(suraId);
+            element.scrollIntoView({ behavior: 'smooth' });
         }
+
+        // Запускаем загрузку при открытии страницы
+        window.onload = loadFullQuran;
     </script>
 </body>
 </html>
