@@ -29,7 +29,7 @@
     <div class="container">
         <header>
             <div class="logo">
-                <img src="https://GrozPray.github.io/images/logo.png" alt="GrozPray" class="logo-img">
+                <img src="https://via.placeholder.com/50x50/2E8B57/FFFFFF?text=GP" alt="Лого" class="logo-img">
                 <h1>GrozPray</h1>
             </div>
             <p class="slogan">Священный Коран</p>
@@ -69,11 +69,11 @@
                 .then(data => {
                     const select = document.getElementById('sura-select');
                     data.data.forEach(sura => {
-                        select.innerHTML += 
+                        select.innerHTML += `
                             <option value="${sura.number}">
                                 ${sura.number}. ${sura.englishName} (${sura.name})
                             </option>
-                        ;
+                        `;
                     });
                 });
         });
@@ -86,31 +86,31 @@
             container.innerHTML = '<div class="loader">Загрузка суры...</div>';
 
             try {
-                const response = await fetch(https://api.alquran.cloud/v1/surah/${suraNumber}/ar.alafasy);
+                const response = await fetch(`https://api.alquran.cloud/v1/surah/${suraNumber}/ar.alafasy`);
                 const data = await response.json();
 
-                let html = 
+                let html = `
                     <h2>${data.data.englishName} (${data.data.name})</h2>
                     <div class="sura-text">
-                ;
+                `;
 
                 data.data.ayahs.forEach(ayah => {
-                    html += 
+                    html += `
                         <div class="ayah">
                             <span class="ayah-number">${ayah.numberInSurah}.</span>
                             <p class="arabic-text">${ayah.text}</p>
                         </div>
-                    ;
+                    `;
                 });
 
                 container.innerHTML = html + '</div>';
             } catch (error) {
-                container.innerHTML = 
+                container.innerHTML = `
                     <div class="error">
                         Ошибка загрузки. Пожалуйста, попробуйте позже.
                         <button onclick="loadSura(${suraNumber})">⟳ Повторить</button>
                     </div>
-                ;
+                `;
             }
         }
     </script>
