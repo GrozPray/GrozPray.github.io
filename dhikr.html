@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-   <head>
-    <!-- Общие стили -->
-    <link rel="stylesheet" href="/styles/main.css">
-    <!-- Стили только для этой страницы -->
-    <link rel="stylesheet" href="/styles/dhikr.css">
-</head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GrozPray - Зикры</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Open+Sans:wght@400;600&display=swap">
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/dhikr.css">
 </head>
 <body>
     <div class="container">
         <header>
             <div class="logo">
-                <img src="https://via.placeholder.com/50x50" alt="Лого" class="logo-img">
+                <img src="https://via.placeholder.com/50x50/2E8B57/FFFFFF?text=GP" alt="Лого" class="logo-img">
                 <h1>GrozPray</h1>
             </div>
             <p class="slogan">Поминание Аллаха</p>
@@ -25,57 +25,110 @@
         </nav>
 
         <main>
-            <!-- Блок с категориями зикров -->
             <section class="card">
-                <h2>Категории зикров</h2>
-                <div class="categories">
+                <div class="dhikr-categories">
                     <button class="category-btn active" data-category="morning">Утренние</button>
                     <button class="category-btn" data-category="evening">Вечерние</button>
                     <button class="category-btn" data-category="after-prayer">После намаза</button>
                 </div>
-            </section>
 
-            <!-- Контейнер для зикров -->
-            <section class="card">
-                <div class="dhikr-item">
-                    <div class="dhikr-arabic" dir="rtl" lang="ar">
-                        سُبْحَانَ اللَّهِ وَبِحَمْدِهِ
-                    </div>
-                    <div class="dhikr-translation">
-                        Субханаллахи ва бихамдих
-                    </div>
-                    <div class="dhikr-meaning">
-                        Преславен Аллах и хвала Ему
-                    </div>
+                <div class="dhikr-list" id="dhikr-list">
+                    <!-- Зикры будут загружены здесь -->
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>© 2024 GrozPray | Источник: "Крепость мусульманина"</p>
+        </footer>
+    </div>
+
+    <script>
+        // База данных зикров
+        const dhikrData = {
+            "morning": [
+                {
+                    "arabic": "أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ",
+                    "translit": "Асбахна ва асбахаль-мульку лиллях",
+                    "meaning": "Мы дожили до утра, и власть принадлежит Аллаху"
+                },
+                {
+                    "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+                    "translit": "Субханаллахи ва бихамдих",
+                    "meaning": "Преславен Аллах и хвала Ему"
+                }
+            ],
+            "evening": [
+                {
+                    "arabic": "أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ",
+                    "translit": "Амсайна ва амсаль-мульку лиллях",
+                    "meaning": "Мы дожили до вечера, и власть принадлежит Аллаху"
+                }
+            ],
+            "after-prayer": [
+                {
+                    "arabic": "أَسْتَغْفِرُ اللَّهَ",
+                    "translit": "Астагфируллах",
+                    "meaning": "Прошу прощения у Аллаха"
+                }
+            ]
+        };
+
+        // Загрузка зикров по категории
+        function loadDhikr(category) {
+            const dhikrList = document.getElementById('dhikr-list');
+            dhikrList.innerHTML = '';
+
+            dhikrData[category].forEach(dhikr => {
+                const dhikrItem = document.createElement('div');
+                dhikrItem.className = 'dhikr-item';
+                dhikrItem.innerHTML = `
+                    <div class="dhikr-arabic" dir="rtl" lang="ar">${dhikr.arabic}</div>
+                    <div class="dhikr-translit">${dhikr.translit}</div>
+                    <div class="dhikr-meaning">${dhikr.meaning}</div>
                     <div class="counter">
                         <button class="counter-btn minus">−</button>
                         <span class="count">0</span>
                         <button class="counter-btn plus">+</button>
                         <span class="times">раз</span>
                     </div>
-                </div>
-            </section>
-        </main>
+                `;
+                dhikrList.appendChild(dhikrItem);
+            });
 
-        <footer>
-            <p>© 2024 GrozPray | Источник: «Крепость мусульманина»</p>
-        </footer>
-    </div>
+            // Инициализация счетчиков
+            initCounters();
+        }
 
-    <script>
-        // Здесь будет логика для зикров
-        document.querySelectorAll('.counter-btn').forEach(btn => {
+        // Инициализация счетчиков
+        function initCounters() {
+            document.querySelectorAll('.counter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const counter = this.parentElement.querySelector('.count');
+                    let count = parseInt(counter.textContent);
+                    
+                    if (this.classList.contains('plus')) {
+                        count++;
+                    } else if (count > 0) {
+                        count--;
+                    }
+                    
+                    counter.textContent = count;
+                });
+            });
+        }
+
+        // Обработчики кнопок категорий
+        document.querySelectorAll('.category-btn').forEach(btn => {
             btn.addEventListener('click', function() {
-                const counter = this.parentElement.querySelector('.count');
-                let count = parseInt(counter.textContent);
-                if (this.classList.contains('plus')) {
-                    count++;
-                } else if (count > 0) {
-                    count--;
-                }
-                counter.textContent = count;
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                loadDhikr(this.dataset.category);
             });
         });
+
+        // Загружаем утренние зикры по умолчанию
+        window.onload = () => loadDhikr('morning');
     </script>
 </body>
 </html>
