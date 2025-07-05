@@ -4,12 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GrozPray - Коран</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Open+Sans:wght@400;600&display=swap">
     <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/quran.css">
+    <style>
+        /* Стили для арабского текста */
+        .arabic-text {
+            font-family: 'Amiri', serif;
+            font-size: 2em;
+            line-height: 2;
+            text-align: right;
+            margin: 20px 0;
+        }
+        .sura-selector {
+            margin-bottom: 20px;
+        }
+        select {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <!-- Шапка как на других страницах -->
         <header>
             <div class="logo">
                 <img src="https://via.placeholder.com/50x50/2E8B57/FFFFFF?text=GP" alt="Лого" class="logo-img">
@@ -18,7 +35,6 @@
             <p class="slogan">Священный Коран</p>
         </header>
         
-        <!-- Меню с emoji -->
         <nav>
             <a href="index.html">🕋 Намаз</a>
             <a href="quran.html" class="active">📖 Коран</a>
@@ -27,24 +43,76 @@
 
         <main>
             <section class="card">
-                <div class="search-box">
-                    <input type="text" id="search-input" placeholder="Найти суру..." oninput="searchSura()">
+                <div class="sura-selector">
+                    <select id="sura-select" onchange="loadSura(this.value)">
+                        <option value="">Выберите суру...</option>
+                        <!-- СурЫ загрузятся через API -->
+                    </select>
                 </div>
 
-                <div class="sura-list" id="sura-list">
-                    <!-- СурЫ будут загружены здесь -->
-                    <div class="loader">Загрузка списка сур...</div>
+                <div id="quran-container">
+                    <!-- Текст суры появится здесь -->
                 </div>
             </section>
         </main>
 
         <footer>
-            <p>© 2024 GrozPray</p>
+            <p>© 2024 GrozPray | Используется API <a href="https://alquran.cloud/api" target="_blank">AlQuran Cloud</a></p>
         </footer>
     </div>
 
     <script>
-        // Ваш скрипт загрузки Корана
+        // Загрузка списка сур при открытии страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('https://api.alquran.cloud/v1/surah')
+                .then(response => response.json())
+                .then(data => {
+                    const select = document.getElementById('sura-select');
+                    data.data.forEach(sura => {
+                        select.innerHTML += `
+                            <option value="${sura.number}">
+                                ${sura.number}. ${sura.englishName} (${sura.name})
+                            </option>
+                        `;
+                    });
+                });
+        });
+
+        // Загрузка текста суры
+        async function loadSura(suraNumber) {
+            if (!suraNumber) return;
+            
+            const container = document.getElementById('quran-container');
+            container.innerHTML = '<div class="loader">Загрузка суры...</div>';
+
+            try {
+                const response = await fetch(`https://api.alquran.cloud/v1/surah/${suraNumber}/ar.alafasy`);
+                const data = await response.json();
+
+                let html = `
+                    <h2>${data.data.englishName} (${data.data.name})</h2>
+                    <div class="sura-text">
+                `;
+
+                data.data.ayahs.forEach(ayah => {
+                    html += `
+                        <div class="ayah">
+                            <span class="ayah-number">${ayah.numberInSurah}.</span>
+                            <p class="arabic-text">${ayah.text}</p>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html + '</div>';
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="error">
+                        Ошибка загрузки. Пожалуйста, попробуйте позже.
+                        <button onclick="loadSura(${suraNumber})">⟳ Повторить</button>
+                    </div>
+                `;
+            }
+        }
     </script>
 </body>
 </html>
