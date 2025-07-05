@@ -1,44 +1,105 @@
-<div class="quran-container">
-  <select id="surah-select" class="surah-dropdown">
-    <option value="">Выберите суру...</option>
-    <!-- СурЫ загрузятся автоматически -->
-  </select>
-  
-  <div id="ayahs-container" class="ayahs-box">
-    <!-- Здесь появятся аяты -->
-  </div>
-  
-  <audio id="audio-player" controls></audio>
-</div>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GrozPray - Коран</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/quran.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <img src="https://via.placeholder.com/50x50/2E8B57/FFFFFF?text=GP" alt="Лого" class="logo-img">
+                <h1>GrozPray</h1>
+            </div>
+            <p class="slogan">Чтение Корана</p>
+        </header>
+        
+        <nav>
+            <a href="index.html">🕋 Намаз</a>
+            <a href="quran.html" class="active">📖 Коран</a>
+            <a href="dhikr.html">📿 Зикры</a>
+        </nav>
 
-<script>
-// Загружаем список сур
-fetch('https://api.alquran.cloud/v1/surah')
-  .then(r => r.json())
-  .then(data => {
-    const select = document.getElementById('surah-select');
-    data.data.forEach(surah => {
-      select.innerHTML += `<option value="${surah.number}">${surah.englishName} (${surah.name})</option>`;
-    });
-  });
+        <main>
+            <section class="card">
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="Найти суру..." oninput="searchSura()">
+                </div>
 
-// Загружаем аяты при выборе суры
-document.getElementById('surah-select').addEventListener('change', function() {
-  const surahNum = this.value;
-  fetch(`https://api.alquran.cloud/v1/surah/${surahNum}/ru.kuliev`)
-    .then(r => r.json())
-    .then(data => {
-      let html = '';
-      data.data.ayahs.forEach(ayah => {
-        html += `
-          <div class="ayah">
-            <p class="arabic" dir="rtl">${ayah.text}</p>
-            <p class="translation">${ayah.translation}</p>
-          </div>
-        `;
-      });
-      document.getElementById('ayahs-container').innerHTML = html;
-      document.getElementById('audio-player').src = `https://server.mp3quran.net/abdulbaset/murattal/${surahNum}.mp3`;
-    });
-});
-</script>
+                <div class="sura-list" id="sura-list">
+                    <!-- СурЫ будут загружены здесь -->
+                    <div class="loader">Загрузка списка сур...</div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>© 2024 GrozPray</p>
+        </footer>
+    </div>
+
+    <script>
+        // Загрузка списка сур
+        fetch('https://api.quran.com/api/v4/chapters?language=ru')
+            .then(response => response.json())
+            .then(data => {
+                let html = '';
+                data.chapters.forEach(sura => {
+                    html += `
+                        <div class="sura-item" data-name="${sura.name_simple.toLowerCase()}">
+                            <div class="sura-header" onclick="loadSura(${sura.id})">
+                                <span class="sura-number">${sura.id}.</span>
+                                <span class="sura-name-arabic">${sura.name_arabic}</span>
+                                <span class="sura-name">${sura.name_simple}</span>
+                                <span class="sura-ayat">${sura.verses_count} аятов</span>
+                            </div>
+                            <div class="sura-content" id="sura-${sura.id}"></div>
+                        </div>
+                    `;
+                });
+                document.getElementById('sura-list').innerHTML = html;
+            });
+
+        // Загрузка текста суры
+        function loadSura(suraId) {
+            const suraContent = document.getElementById(`sura-${suraId}`);
+            
+            if (suraContent.innerHTML === '') {
+                suraContent.innerHTML = '<div class="loader">Загрузка...</div>';
+                
+                fetch(`https://api.quran.com/api/v4/verses/by_chapter/${suraId}?language=ru&words=false`)
+                    .then(response => response.json())
+                    .then(data => {
+                        let versesHtml = '';
+                        data.verses.forEach(verse => {
+                            versesHtml += `
+                                <div class="ayah">
+                                    <span class="ayah-number">${verse.verse_number}.</span>
+                                    <p class="ayah-text" dir="rtl" lang="ar">${verse.text_uthmani}</p>
+                                    <p class="translation">${verse.translations[0].text}</p>
+                                </div>
+                            `;
+                        });
+                        suraContent.innerHTML = versesHtml;
+                    });
+            } else {
+                suraContent.innerHTML = '';
+            }
+        }
+
+        // Поиск сур
+        function searchSura() {
+            const input = document.getElementById('search-input').value.toLowerCase();
+            const suraItems = document.querySelectorAll('.sura-item');
+            
+            suraItems.forEach(item => {
+                const suraName = item.getAttribute('data-name');
+                item.style.display = suraName.includes(input) ? 'block' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>
