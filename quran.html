@@ -2,100 +2,80 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GrozPray - Полный Коран</title>
+    <title>GrozPray - Коран</title>
     <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/quran.css">
+    <style>
+        /* Стили только для арабского текста */
+        .sura-container {
+            direction: rtl;
+            font-family: 'Amiri', serif;
+        }
+        .ayat {
+            font-size: 1.8em;
+            line-height: 2;
+            text-align: right;
+            margin: 15px 0;
+        }
+    </style>
 </head>
 <body>
+    <!-- Шапка и меню на русском -->
     <div class="container">
         <header>
             <div class="logo">
-                <img src="https://via.placeholder.com/50x50/2E8B57/FFFFFF?text=GP" alt="Лого" class="logo-img">
-                <h1>GrozPray</h1>
+                <img src="logo.png" alt="GrozPray">
+                <h1>Коран</h1>
             </div>
-            <p class="slogan">Полный текст Корана</p>
         </header>
         
         <nav>
-            <a href="index.html">🕋 Намаз</a>
-            <a href="quran.html" class="active">📖 Коран</a>
-            <a href="dhikr.html">📿 Зикры</a>
+            <a href="index.html">Намаз</a>
+            <a href="quran.html" class="active">Коран</a>
+            <a href="dhikr.html">Зикры</a>
         </nav>
 
+        <!-- Блок с арабским текстом -->
         <main>
-            <section class="card">
-                <div class="quick-nav">
-                    <label for="sura-select">Быстрый переход:</label>
-                    <select id="sura-select" onchange="scrollToSura(this.value)">
-                        <option value="">Выберите суру...</option>
-                        <!-- Опции загрузятся через JS -->
-                    </select>
-                </div>
-
-                <div id="full-quran">
-                    <!-- Весь Коран загрузится здесь -->
-                    <div class="loader">Загрузка Корана...</div>
-                </div>
-            </section>
+            <div class="sura-selector">
+                <select id="sura-select" onchange="loadSura(this.value)">
+                    <option value="">Выберите суру</option>
+                    <!-- Опции загрузятся через JS -->
+                </select>
+            </div>
+            
+            <div class="sura-container card" id="quran-container">
+                <!-- Арабский текст появится здесь -->
+            </div>
         </main>
-
-        <footer>
-            <p>© 2024 GrozPray | Источник: Tanzil.net</p>
-        </footer>
     </div>
 
     <script>
-        // Загрузка всего Корана
-        async function loadFullQuran() {
-            try {
-                const response = await fetch('quran-text.json'); // Локальный файл с текстом
-                const data = await response.json();
-                
-                let html = '';
+        // Загрузка списка сур
+        fetch('https://api.alquran.cloud/v1/surah')
+            .then(r => r.json())
+            .then(data => {
                 const select = document.getElementById('sura-select');
-                
-                data.suras.forEach(sura => {
-                    // Добавляем в select
-                    select.innerHTML += `<option value="sura-${sura.number}">${sura.number}. ${sura.name} (${sura.arabicName})</option>`;
-                    
-                    // Формируем текст суры
-                    html += `
-                        <div class="sura" id="sura-${sura.number}">
-                            <h2 class="sura-title">
-                                <span class="sura-num">${sura.number}.</span>
-                                <span class="sura-name-arabic">${sura.arabicName}</span>
-                                <span class="sura-name">${sura.name}</span>
-                            </h2>
-                            <div class="sura-text">
-                                ${sura.ayats.map(ayat => `
-                                    <div class="ayat">
-                                        <span class="ayat-num">${ayat.number}.</span>
-                                        <p class="arabic" dir="rtl" lang="ar">${ayat.text}</p>
-                                        <p class="translation">${ayat.translation}</p>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    `;
+                data.data.forEach(sura => {
+                    select.innerHTML += `<option value="${sura.number}">${sura.number}. ${sura.englishName} (${sura.name})</option>`;
                 });
-                
-                document.getElementById('full-quran').innerHTML = html;
-            } catch (error) {
-                console.error('Ошибка загрузки:', error);
-                document.getElementById('full-quran').innerHTML = '<p class="error">Не удалось загрузить Коран. Попробуйте позже.</p>';
-            }
-        }
+            });
 
-        // Прокрутка к выбранной суре
-        function scrollToSura(suraId) {
-            if (!suraId) return;
-            const element = document.getElementById(suraId);
-            element.scrollIntoView({ behavior: 'smooth' });
+        // Загрузка суры
+        async function loadSura(suraNumber) {
+            const response = await fetch(`https://api.alquran.cloud/v1/surah/${suraNumber}/ar.alafasy`);
+            const sura = await response.json();
+            
+            let html = `
+                <h2>سورة ${sura.data.name}</h2>
+                <div class="sura-text">
+            `;
+            
+            sura.data.ayahs.forEach(ayah => {
+                html += `<p class="ayat">${ayah.text}</p>`;
+            });
+            
+            document.getElementById('quran-container').innerHTML = html + '</div>';
         }
-
-        // Запускаем загрузку при открытии страницы
-        window.onload = loadFullQuran;
     </script>
 </body>
 </html>
