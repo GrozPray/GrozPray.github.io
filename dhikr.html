@@ -11,8 +11,8 @@
 <body>
     <div class="container">
         <header>
-                <h1>GrozPray</h1>
-            </div>
+            <h1>GrozPray</h1>
+            <p class="slogan">Ваш помощник в поклонении</p>
         </header>
         
         <nav>
@@ -27,6 +27,7 @@
                     <button class="category-btn active" data-category="morning">Утренние</button>
                     <button class="category-btn" data-category="evening">Вечерние</button>
                     <button class="category-btn" data-category="after-prayer">После намаза</button>
+                    <button class="category-btn" data-category="sleep">Перед сном</button>
                 </div>
 
                 <div class="dhikr-list" id="dhikr-list">
@@ -36,37 +37,73 @@
         </main>
 
         <footer>
-            <p>© 2024 GrozPray</p>
+            <p>© 2024 GrozPray | Сделано для мусульман</p>
         </footer>
     </div>
 
     <script>
-        // База данных зикров
+        // Расширенная база данных зикров
         const dhikrData = {
             "morning": [
                 {
                     "arabic": "أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ",
                     "translit": "Асбахна ва асбахаль-мульку лиллях",
-                    "meaning": "Мы дожили до утра, и власть принадлежит Аллаху"
+                    "meaning": "Мы дожили до утра, и власть принадлежит Аллаху",
+                    "count": 1
                 },
                 {
                     "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
                     "translit": "Субханаллахи ва бихамдих",
-                    "meaning": "Преславен Аллах и хвала Ему"
+                    "meaning": "Преславен Аллах и хвала Ему",
+                    "count": 33
+                },
+                {
+                    "arabic": "اللَّهُ أَكْبَرُ",
+                    "translit": "Аллаху акбар",
+                    "meaning": "Аллах Велик",
+                    "count": 34
                 }
             ],
             "evening": [
                 {
                     "arabic": "أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ",
                     "translit": "Амсайна ва амсаль-мульку лиллях",
-                    "meaning": "Мы дожили до вечера, и власть принадлежит Аллаху"
+                    "meaning": "Мы дожили до вечера, и власть принадлежит Аллаху",
+                    "count": 1
+                },
+                {
+                    "arabic": "سُبْحَانَ اللَّهِ",
+                    "translit": "Субханаллах",
+                    "meaning": "Преславен Аллах",
+                    "count": 33
                 }
             ],
             "after-prayer": [
                 {
                     "arabic": "أَسْتَغْفِرُ اللَّهَ",
                     "translit": "Астагфируллах",
-                    "meaning": "Прошу прощения у Аллаха"
+                    "meaning": "Прошу прощения у Аллаха",
+                    "count": 3
+                },
+                {
+                    "arabic": "لَا إِلَهَ إِلَّا اللَّهُ",
+                    "translit": "Ля иляха илляллах",
+                    "meaning": "Нет божества, кроме Аллаха",
+                    "count": 33
+                }
+            ],
+            "sleep": [
+                {
+                    "arabic": "بِاسْمِكَ رَبِّي وَضَعْتُ جَنْبِي",
+                    "translit": "Бисмика рабби вада'ту джанби",
+                    "meaning": "Именем Твоим, Господи, я ложусь",
+                    "count": 1
+                },
+                {
+                    "arabic": "الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنَا وَسَقَانَا",
+                    "translit": "Альхамдулилляхи аллязи ат'амана ва сакана",
+                    "meaning": "Хвала Аллаху, Который накормил и напоил нас",
+                    "count": 1
                 }
             ]
         };
@@ -87,30 +124,42 @@
                         <button class="counter-btn minus">−</button>
                         <span class="count">0</span>
                         <button class="counter-btn plus">+</button>
-                        <span class="times">раз</span>
+                        <span class="times">/${dhikr.count}</span>
                     </div>
                 `;
                 dhikrList.appendChild(dhikrItem);
             });
 
-            // Инициализация счетчиков
             initCounters();
         }
 
-        // Инициализация счетчиков
+        // Инициализация счетчиков с вибрацией
         function initCounters() {
             document.querySelectorAll('.counter-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
+                    // Вибрация при нажатии (поддержка мобильных устройств)
+                    if (navigator.vibrate) navigator.vibrate(50);
+                    
                     const counter = this.parentElement.querySelector('.count');
+                    const maxCount = parseInt(this.parentElement.querySelector('.times').textContent.slice(1));
                     let count = parseInt(counter.textContent);
                     
-                    if (this.classList.contains('plus')) {
+                    if (this.classList.contains('plus') && count < maxCount) {
                         count++;
-                    } else if (count > 0) {
+                    } else if (this.classList.contains('minus') && count > 0) {
                         count--;
                     }
                     
                     counter.textContent = count;
+                    
+                    // Изменение цвета при достижении максимума
+                    if (count >= maxCount) {
+                        counter.style.color = '#2c6e49';
+                        counter.style.fontWeight = 'bold';
+                    } else {
+                        counter.style.color = '';
+                        counter.style.fontWeight = '';
+                    }
                 });
             });
         }
@@ -121,11 +170,34 @@
                 document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 loadDhikr(this.dataset.category);
+                
+                // Плавная прокрутка к началу списка
+                document.getElementById('dhikr-list').scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
             });
         });
 
         // Загружаем утренние зикры по умолчанию
-        window.onload = () => loadDhikr('morning');
+        window.addEventListener('load', () => {
+            loadDhikr('morning');
+            
+            // Запрос разрешения на уведомления (для будущих функций)
+            if ('Notification' in window && Notification.permission !== 'denied') {
+                Notification.requestPermission();
+            }
+        });
+
+        // Сохранение прогресса в localStorage
+        window.addEventListener('beforeunload', () => {
+            const counters = {};
+            document.querySelectorAll('.dhikr-item').forEach((item, index) => {
+                const count = item.querySelector('.count').textContent;
+                counters[index] = count;
+            });
+            localStorage.setItem('dhikrCounters', JSON.stringify(counters));
+        });
     </script>
 </body>
 </html>
