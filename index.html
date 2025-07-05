@@ -9,6 +9,53 @@
     <link rel="stylesheet" href="styles/index.css">
 </head>
 <body>
+    <script>
+// Запросить разрешение на уведомления
+Notification.requestPermission().then(permission => {
+  if (permission !== "granted") {
+    console.log("Уведомления не разрешены пользователем");
+    return;
+  }
+
+  // Получить время намаза для Грозного
+  fetch("https://api.aladhan.com/v1/timingsByCity?city=Grozny&country=Russia&method=2")
+    .then(response => response.json())
+    .then(data => {
+      const fajrTime = data.data.timings.Fajr; // например "03:15"
+      console.log("Время Фаджр:", fajrTime);
+
+      // Получить текущее время
+      const now = new Date();
+      const todayFajr = new Date(now);
+      const [hours, minutes] = fajrTime.split(":");
+      todayFajr.setHours(parseInt(hours, 10));
+      todayFajr.setMinutes(parseInt(minutes, 10));
+      todayFajr.setSeconds(0);
+
+      // Если время Фаджр уже прошло сегодня, не уведомляем
+      if (todayFajr < now) {
+        console.log("Время Фаджр сегодня уже прошло");
+        return;
+      }
+
+      // Рассчитать задержку до времени Фаджр
+      const delay = todayFajr - now;
+      console.log(`Уведомление через ${Math.round(delay / 60000)} минут`);
+
+      setTimeout(() => {
+        new Notification("Время намаза!", {
+          body: `Сейчас время Фаджр: ${fajrTime}. Пора совершить намаз 🙏`,
+          icon: "images/logo.png" // путь к твоему логотипу
+        });
+      }, delay);
+
+    })
+    .catch(error => {
+      console.error("Не удалось получить время намаза:", error);
+    });
+});
+</script>
+
     <div class="container">
         <header>
             <div class="logo">
