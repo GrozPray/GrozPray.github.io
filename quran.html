@@ -7,9 +7,61 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Open+Sans:wght@400;600&display=swap">
     <link rel="stylesheet" href="styles/main.css">
     <style>
-        /* Стили для арабского текста */
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        .logo-img {
+            width: 50px;
+            margin-right: 15px;
+        }
+        h1 {
+            font-size: 2em;
+            margin: 0;
+        }
+        .slogan {
+            margin: 5px 0 20px;
+            font-size: 1.2em;
+            color: #555;
+        }
+        nav {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        nav a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: 600;
+        }
+        nav a.active {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+        .card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
         .arabic-text {
-            font-family: 'Amiri', serif;
+            font-family: 'Amiri', 'Scheherazade', serif;
             font-size: 2em;
             line-height: 2;
             text-align: right;
@@ -19,9 +71,29 @@
             margin-bottom: 20px;
         }
         select {
+            width: 100%;
             padding: 10px;
             border-radius: 5px;
             border: 1px solid #ddd;
+        }
+        .loader {
+            text-align: center;
+            padding: 20px;
+        }
+        .error {
+            color: red;
+            text-align: center;
+            padding: 20px;
+        }
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #777;
+        }
+        footer a {
+            color: #007bff;
+            text-decoration: none;
         }
     </style>
 </head>
@@ -32,9 +104,9 @@
                 <img src="images/logo.png" alt="GrozPray" class="logo-img">
                 <h1>GrozPray</h1>
             </div>
-            <p class="slogan">Священный Коран</p>
         </header>
-        
+        <p class="slogan">Священный Коран</p>
+
         <nav>
             <a href="index.html">🕋 Намаз</a>
             <a href="quran.html" class="active">📖 Коран</a>
@@ -46,7 +118,7 @@
                 <div class="sura-selector">
                     <select id="sura-select" onchange="loadSura(this.value)">
                         <option value="">Выберите суру...</option>
-                        <!-- СурЫ загрузятся через API -->
+                        <!-- Суры загрузятся через API -->
                     </select>
                 </div>
 
@@ -62,26 +134,31 @@
     </div>
 
     <script>
-        // Загрузка списка сур при открытии страницы
         document.addEventListener('DOMContentLoaded', function() {
             fetch('https://api.alquran.cloud/v1/surah')
                 .then(response => response.json())
                 .then(data => {
                     const select = document.getElementById('sura-select');
+                    let options = '';
                     data.data.forEach(sura => {
-                        select.innerHTML += `
+                        options += `
                             <option value="${sura.number}">
                                 ${sura.number}. ${sura.englishName} (${sura.name})
                             </option>
                         `;
                     });
+                    select.innerHTML += options;
+                })
+                .catch(error => {
+                    const select = document.getElementById('sura-select');
+                    select.innerHTML = '<option disabled>Не удалось загрузить список сур</option>';
+                    console.error('Ошибка загрузки списка сур:', error);
                 });
         });
 
-        // Загрузка текста суры
         async function loadSura(suraNumber) {
             if (!suraNumber) return;
-            
+
             const container = document.getElementById('quran-container');
             container.innerHTML = '<div class="loader">Загрузка суры...</div>';
 
@@ -105,10 +182,11 @@
 
                 container.innerHTML = html + '</div>';
             } catch (error) {
+                console.error('Ошибка загрузки суры:', error);
                 container.innerHTML = `
                     <div class="error">
                         Ошибка загрузки. Пожалуйста, попробуйте позже.
-                        <button onclick="loadSura(${suraNumber})">⟳ Повторить</button>
+                        <button onclick="loadSura('${suraNumber}')">⟳ Повторить</button>
                     </div>
                 `;
             }
