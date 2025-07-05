@@ -2,80 +2,49 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GrozPray - Коран</title>
     <link rel="stylesheet" href="styles/main.css">
-    <style>
-        /* Стили только для арабского текста */
-        .sura-container {
-            direction: rtl;
-            font-family: 'Amiri', serif;
-        }
-        .ayat {
-            font-size: 1.8em;
-            line-height: 2;
-            text-align: right;
-            margin: 15px 0;
-        }
-    </style>
+    <link rel="stylesheet" href="styles/quran.css">
 </head>
 <body>
-    <!-- Шапка и меню на русском -->
     <div class="container">
+        <!-- Шапка как на других страницах -->
         <header>
             <div class="logo">
-                <img src="logo.png" alt="GrozPray">
-                <h1>Коран</h1>
+                <img src="https://via.placeholder.com/50x50/2E8B57/FFFFFF?text=GP" alt="Лого" class="logo-img">
+                <h1>GrozPray</h1>
             </div>
+            <p class="slogan">Священный Коран</p>
         </header>
         
+        <!-- Меню с emoji -->
         <nav>
-            <a href="index.html">Намаз</a>
-            <a href="quran.html" class="active">Коран</a>
-            <a href="dhikr.html">Зикры</a>
+            <a href="index.html">🕋 Намаз</a>
+            <a href="quran.html" class="active">📖 Коран</a>
+            <a href="dhikr.html">📿 Зикры</a>
         </nav>
 
-        <!-- Блок с арабским текстом -->
         <main>
-            <div class="sura-selector">
-                <select id="sura-select" onchange="loadSura(this.value)">
-                    <option value="">Выберите суру</option>
-                    <!-- Опции загрузятся через JS -->
-                </select>
-            </div>
-            
-            <div class="sura-container card" id="quran-container">
-                <!-- Арабский текст появится здесь -->
-            </div>
+            <section class="card">
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="Найти суру..." oninput="searchSura()">
+                </div>
+
+                <div class="sura-list" id="sura-list">
+                    <!-- СурЫ будут загружены здесь -->
+                    <div class="loader">Загрузка списка сур...</div>
+                </div>
+            </section>
         </main>
+
+        <footer>
+            <p>© 2024 GrozPray</p>
+        </footer>
     </div>
 
     <script>
-        // Загрузка списка сур
-        fetch('https://api.alquran.cloud/v1/surah')
-            .then(r => r.json())
-            .then(data => {
-                const select = document.getElementById('sura-select');
-                data.data.forEach(sura => {
-                    select.innerHTML += `<option value="${sura.number}">${sura.number}. ${sura.englishName} (${sura.name})</option>`;
-                });
-            });
-
-        // Загрузка суры
-        async function loadSura(suraNumber) {
-            const response = await fetch(`https://api.alquran.cloud/v1/surah/${suraNumber}/ar.alafasy`);
-            const sura = await response.json();
-            
-            let html = `
-                <h2>سورة ${sura.data.name}</h2>
-                <div class="sura-text">
-            `;
-            
-            sura.data.ayahs.forEach(ayah => {
-                html += `<p class="ayat">${ayah.text}</p>`;
-            });
-            
-            document.getElementById('quran-container').innerHTML = html + '</div>';
-        }
+        // Ваш скрипт загрузки Корана
     </script>
 </body>
 </html>
