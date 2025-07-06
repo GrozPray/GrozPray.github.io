@@ -20,7 +20,7 @@
             <a href="dhikr.html" class="active">📿 Зикры</a>
         </nav>
 
-        <main>
+        <main id="main-content">
             <section class="card">
                 <div class="dhikr-categories">
                     <button class="category-btn active" data-category="morning">Утренние</button>
@@ -111,10 +111,10 @@
             });
         });
 
-        window.onload = () => loadDhikr('morning');
-        <main class="main-content" id="main-content">
-         <script>
-          document.getElementById('main-content').classList.add('loaded');
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDhikr('morning');
+            document.getElementById('main-content').classList.add('loaded');
+        });
     </script>
 </body>
 </html>
