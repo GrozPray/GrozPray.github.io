@@ -249,130 +249,175 @@
         </footer>
     </div>
 
-    <script>
-        // Используем кэш для хранения загруженных данных
-        const quranCache = {
-            suras: null,
-            arabicText: {},
-            translations: {}
+<script>
+// Режим работы: online (true) или offline (false)
+let onlineMode = true;
+
+// Проверка подключения к интернету
+async function checkInternetConnection() {
+    try {
+        const response = await fetch('https://api.alquran.cloud/v1/surah/1', {cache: "no-store"});
+        return response.ok;
+    } catch {
+        return false;
+    }
+}
+
+// Основная функция загрузки
+async function initQuran() {
+    onlineMode = await checkInternetConnection();
+    
+    if (onlineMode) {
+        loadFromAPI();
+    } else {
+        loadFromLocal();
+    }
+}
+
+// Загрузка из API
+async function loadFromAPI() {
+    try {
+        const response = await fetch('https://api.alquran.cloud/v1/surah');
+        const data = await response.json();
+        populateSuraList(data.data);
+    } catch (error) {
+        console.error("Ошибка API, переключаемся на оффлайн:", error);
+        loadFromLocal();
+    }
+}
+
+// Загрузка из локального файла
+async function loadFromLocal() {
+    try {
+        // Встроенные данные (минимум для примера)
+        const localData = {
+            "1": {
+                "number": 1,
+                "name": "الفاتحة",
+                "englishName": "Al-Fatiha",
+                "ayahs": [
+                    {"numberInSurah": 1, "text": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ"},
+                    {"numberInSurah": 2, "text": "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ"}
+                ]
+            }
         };
-
-        // Основные функции
-        async function loadSuraList() {
-            try {
-                const response = await fetch('https://api.alquran.cloud/v1/surah');
-                const data = await response.json();
-                quranCache.suras = data.data;
-                renderSuraList();
-            } catch (error) {
-                console.error('Ошибка загрузки списка сур:', error);
-                document.getElementById('suras-list').innerHTML = 
-                    '<div class="error">Ошибка загрузки. Обновите страницу.</div>';
-            }
-        }
-
-        function renderSuraList() {
-            const suraListElement = document.getElementById('suras-list');
-            suraListElement.innerHTML = '';
-            
-            quranCache.suras.forEach(sura => {
-                const suraItem = document.createElement('div');
-                suraItem.className = 'sura-sidebar-item';
-                suraItem.innerHTML = `
-                    <strong>${sura.number}.</strong> ${sura.englishName} (${sura.name})
-                `;
-                suraItem.dataset.number = sura.number;
-                
-                suraItem.addEventListener('click', () => {
-                    // Удаляем активный класс у всех элементов
-                    document.querySelectorAll('.sura-sidebar-item').forEach(item => {
-                        item.classList.remove('active');
-                    });
-                    // Добавляем активный класс к текущему
-                    suraItem.classList.add('active');
-                    // Загружаем суру
-                    loadSurah(sura.number);
-                });
-                
-                suraListElement.appendChild(suraItem);
-            });
-        }
-
-        async function loadSurah(surahNumber) {
-            const quranDisplay = document.getElementById('quran-display');
-            quranDisplay.innerHTML = '<div class="loading">Загрузка суры...</div>';
-            
-            try {
-                // Загружаем арабский текст и перевод параллельно
-                const [arabicData, translationData] = await Promise.all([
-                    getArabicText(surahNumber),
-                    getTranslation(surahNumber)
-                ]);
-                
-                renderSurah(arabicData, translationData);
-            } catch (error) {
-                console.error('Ошибка загрузки суры:', error);
-                quranDisplay.innerHTML = `
-                    <div class="error">
-                        Ошибка загрузки. Пожалуйста, попробуйте позже.
-                        <button onclick="loadSurah(${surahNumber})">⟳ Повторить</button>
-                    </div>
-                `;
-            }
-        }
-
-        async function getArabicText(surahNumber) {
-            if (!quranCache.arabicText[surahNumber]) {
-                const response = await fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/ar.alafasy`);
-                const data = await response.json();
-                quranCache.arabicText[surahNumber] = data.data;
-            }
-            return quranCache.arabicText[surahNumber];
-        }
-
-        async function getTranslation(surahNumber) {
-            if (!quranCache.translations[surahNumber]) {
-                const response = await fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/ru.kuliev`);
-                const data = await response.json();
-                quranCache.translations[surahNumber] = data.data;
-            }
-            return quranCache.translations[surahNumber];
-        }
-
-        function renderSurah(arabicData, translationData) {
-            const quranDisplay = document.getElementById('quran-display');
-            const sura = arabicData;
-            const translation = translationData;
-            
-            let contentHTML = `
-                <div class="sura-header">
-                    <h2 class="sura-title">${sura.englishName} (${sura.name})</h2>
-                    <div class="sura-name-arabic">${sura.englishNameTranslation}</div>
-                    <div>${sura.revelationType} • ${sura.numberOfAyahs} аятов</div>
-                </div>
+        
+        // Если есть внешний JSON файл
+        try {
+            const response = await fetch('quran-local.json');
+            const fullData = await response.json();
+            populateSuraList(Object.values(fullData));
+            return;
+        } catch {
+            // Используем встроенные данные, если файл не найден
+            populateSuraList([localData["1"]]);
+            document.getElementById('sura-select').innerHTML += `
+                <option disabled>⚠ Оффлайн-режим (только 1-я сура)</option>
             `;
-            
-            sura.ayahs.forEach((aya, index) => {
-                contentHTML += `
-                    <div class="aya-container">
-                        <div class="aya">
-                            ${aya.text} <span class="aya-number">${aya.numberInSurah}</span>
-                        </div>
-                        <div class="translation">
-                            ${translation.ayahs[index].text}
-                        </div>
-                    </div>
-                `;
-            });
-            
-            quranDisplay.innerHTML = contentHTML;
-            
-            // Прокручиваем к началу суры
-            document.querySelector('.quran-content').scrollTo(0, 0);
         }
+    } catch (error) {
+        console.error("Ошибка локальной загрузки:", error);
+        document.getElementById('quran-container').innerHTML = `
+            <div class="error">
+                Ошибка загрузки. Нет подключения к интернету и локальных данных.
+            </div>
+        `;
+    }
+}
 
-        // Инициализация при загрузке страницы
-        document.addEventListener('DOMContentLoaded', loadSuraList);
-    </script>
+// Общая функция для отображения списка сур
+function populateSuraList(suras) {
+    const select = document.getElementById('sura-select');
+    select.innerHTML = '<option value="">Выберите суру</option>';
+    
+    suras.forEach(sura => {
+        select.innerHTML += `
+            <option value="${sura.number}">
+                ${sura.number}. ${sura.englishName} (${sura.name})
+            </option>
+        `;
+    });
+    
+    select.addEventListener('change', function() {
+        const suraNumber = this.value;
+        if (!suraNumber) return;
+        
+        if (onlineMode) {
+            loadSuraFromAPI(suraNumber);
+        } else {
+            loadSuraFromLocal(suraNumber);
+        }
+    });
+}
+
+// Загрузка суры из API
+async function loadSuraFromAPI(suraNumber) {
+    try {
+        const response = await fetch(`https://api.alquran.cloud/v1/surah/${suraNumber}/ar.alafasy`);
+        const data = await response.json();
+        displaySura(data.data);
+    } catch (error) {
+        console.error("Ошибка загрузки суры:", error);
+        document.getElementById('quran-container').innerHTML = `
+            <div class="error">
+                Ошибка загрузки. Попробуйте позже.
+                <button onclick="loadSuraFromAPI('${suraNumber}')">⟳ Повторить</button>
+            </div>
+        `;
+    }
+}
+
+// Загрузка суры из локальных данных
+async function loadSuraFromLocal(suraNumber) {
+    try {
+        // Здесь должна быть логика загрузки из вашего локального JSON
+        // Для примера используем простой объект
+        const localSuras = {
+            "1": {
+                "number": 1,
+                "name": "الفاتحة",
+                "englishName": "Al-Fatiha",
+                "ayahs": [
+                    {"numberInSurah": 1, "text": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ"},
+                    {"numberInSurah": 2, "text": "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ"}
+                ]
+            }
+        };
+        
+        if (localSuras[suraNumber]) {
+            displaySura(localSuras[suraNumber]);
+        } else {
+            throw new Error("Сурa не найдена в оффлайн-данных");
+        }
+    } catch (error) {
+        console.error("Ошибка загрузки суры:", error);
+        document.getElementById('quran-container').innerHTML = `
+            <div class="error">
+                Эта сура недоступна в оффлайн-режиме.
+                ${onlineMode ? '' : '<br>Подключитесь к интернету для полной версии.'}
+            </div>
+        `;
+    }
+}
+
+// Отображение суры (общая функция)
+function displaySura(sura) {
+    let html = `<h2>${sura.englishName} (${sura.name})</h2><div class="sura-text">`;
+    
+    sura.ayahs.forEach(ayah => {
+        html += `
+            <div class="ayah">
+                <span class="ayah-number">${ayah.numberInSurah}.</span>
+                <p class="arabic-text">${ayah.text}</p>
+            </div>
+        `;
+    });
+    
+    document.getElementById('quran-container').innerHTML = html + '</div>';
+}
+
+// Инициализация при загрузке
+document.addEventListener('DOMContentLoaded', initQuran);
+</script>
 </body>
 </html>
