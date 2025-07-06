@@ -44,4 +44,75 @@
         const dhikrData = {
             "morning": [
                 {
-                    "arabic": "أَصْبَحْنَا وَ
+                    "arabic": "أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ",
+                    "translit": "Асбахна ва асбахаль-мульку лиллях",
+                    "meaning": "Мы дожили до утра, и власть принадлежит Аллаху"
+                },
+                {
+                    "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+                    "translit": "Субханаллахи ва бихамдих",
+                    "meaning": "Преславен Аллах и хвала Ему"
+                }
+            ],
+            "evening": [
+                {
+                    "arabic": "أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ",
+                    "translit": "Амсайна ва амсаль-мульку лиллях",
+                    "meaning": "Мы дожили до вечера, и власть принадлежит Аллаху"
+                }
+            ],
+            "after-prayer": [
+                {
+                    "arabic": "أَسْتَغْفِرُ اللَّهَ",
+                    "translit": "Астагфируллах",
+                    "meaning": "Прошу прощения у Аллаха"
+                }
+            ]
+        };
+
+        function loadDhikr(category) {
+            const dhikrList = document.getElementById('dhikr-list');
+            dhikrList.innerHTML = '';
+
+            dhikrData[category].forEach(dhikr => {
+                const dhikrItem = document.createElement('div');
+                dhikrItem.className = 'dhikr-item';
+                dhikrItem.innerHTML = `
+                    <div class="dhikr-arabic">${dhikr.arabic}</div>
+                    <div class="dhikr-translit">${dhikr.translit}</div>
+                    <div class="dhikr-meaning">${dhikr.meaning}</div>
+                    <div class="counter">
+                        <button class="counter-btn minus">−</button>
+                        <span class="count">0</span>
+                        <button class="counter-btn plus">+</button>
+                    </div>
+                `;
+                dhikrList.appendChild(dhikrItem);
+            });
+
+            initCounters();
+        }
+
+        function initCounters() {
+            document.querySelectorAll('.counter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const counter = this.parentElement.querySelector('.count');
+                    let count = parseInt(counter.textContent);
+                    count = this.classList.contains('plus') ? count + 1 : Math.max(0, count - 1);
+                    counter.textContent = count;
+                });
+            });
+        }
+
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                loadDhikr(this.dataset.category);
+            });
+        });
+
+        window.onload = () => loadDhikr('morning');
+    </script>
+</body>
+</html>
