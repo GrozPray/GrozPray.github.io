@@ -108,59 +108,65 @@
         </footer>
     </div>
 
-    <script>
-        // Загрузка настроек
-        document.addEventListener('DOMContentLoaded', () => {
-            // Инициализация переключателей
-            document.getElementById('dark-mode-toggle').checked = 
-                localStorage.getItem('darkMode') === 'true';
-            document.getElementById('notifications-toggle').checked = 
-                localStorage.getItem('notificationsEnabled') === 'true';
-            document.getElementById('audio-toggle').checked = 
-                localStorage.getItem('autoAudio') === 'true';
+   <script>
+    // Загрузка настроек
+    document.addEventListener('DOMContentLoaded', () => {
+        // Инициализация переключателей
+        document.getElementById('dark-mode-toggle').checked = 
+            localStorage.getItem('darkMode') === 'true';
+        document.getElementById('notifications-toggle').checked = 
+            localStorage.getItem('notificationsEnabled') === 'true';
+        document.getElementById('audio-toggle').checked = 
+            localStorage.getItem('autoAudio') === 'true';
 
-            // Анимация загрузки
-            document.getElementById('main-content').classList.add('loaded');
-        });
+        // Анимация загрузки
+        document.getElementById('main-content').classList.add('loaded');
+    });
 
-        // Обработчики изменений
-        document.getElementById('dark-mode-toggle').addEventListener('change', (e) => {
-            localStorage.setItem('darkMode', e.target.checked);
-            // Применяем сразу на всех страницах
-            if (e.target.checked) {
-                document.body.classList.add('night-mode');
-            } else {
-                document.body.classList.remove('night-mode');
+    // Обработчики изменений
+    document.getElementById('dark-mode-toggle').addEventListener('change', (e) => {
+        localStorage.setItem('darkMode', e.target.checked);
+        document.body.classList.toggle('night-mode', e.target.checked);
+    });
+
+    document.getElementById('notifications-toggle').addEventListener('change', (e) => {
+        localStorage.setItem('notificationsEnabled', e.target.checked);
+        if (e.target.checked && Notification.permission !== 'granted') {
+            Notification.requestPermission();
+        }
+    });
+
+    document.getElementById('audio-toggle').addEventListener('change', (e) => {
+        localStorage.setItem('autoAudio', e.target.checked);
+    });
+
+    // Исправленная функция сброса счетчиков
+    document.getElementById('reset-counters').addEventListener('click', () => {
+        if (confirm('Вы уверены, что хотите сбросить все счетчики зикров?')) {
+            // Удаляем все записи счетчиков
+            Object.keys(localStorage).forEach(key => {
+                if (key.startsWith('count_')) {
+                    localStorage.removeItem(key);
+                }
+            });
+            
+            // Дополнительно удаляем по ID зикров
+            const allDhikrs = Object.values(dhikrData).flat();
+            allDhikrs.forEach(dhikr => {
+                localStorage.removeItem(`count_${dhikr.id}`);
+            });
+            
+            // Обновляем страницу зикров, если она открыта
+            if (window.location.pathname.endsWith('dhikr.html')) {
+                const activeCategory = document.querySelector('.category-btn.active')?.dataset.category;
+                if (activeCategory) {
+                    loadDhikr(activeCategory);
+                }
             }
-        });
-
-        document.getElementById('notifications-toggle').addEventListener('change', (e) => {
-            localStorage.setItem('notificationsEnabled', e.target.checked);
-            if (e.target.checked && Notification.permission !== 'granted') {
-                Notification.requestPermission();
-            }
-        });
-
-        document.getElementById('audio-toggle').addEventListener('change', (e) => {
-            localStorage.setItem('autoAudio', e.target.checked);
-        });
-
-        document.getElementById('reset-counters').addEventListener('click', () => {
-            if (confirm('Вы уверены, что хотите сбросить все счетчики зикров?')) {
-                Object.keys(localStorage).forEach(key => {
-                    if (key.startsWith('count_')) {
-                        localStorage.removeItem(key);
-                    }
-                });
-                alert('Счетчики сброшены!');
-            }
-        });
-    </script>
-    <script>
-  // Проверка темного режима при загрузке
-  if (localStorage.getItem('darkMode') === 'true') {
-    document.body.classList.add('night-mode');
-  }
+            
+            alert('Все счетчики успешно сброшены!');
+        }
+    });
 </script>
 </body>
 </html>
