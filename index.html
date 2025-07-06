@@ -163,7 +163,12 @@
         loadPrayerTimes();
         setInterval(checkCurrentPrayer, 60000);
     </script>
-    <!-- После всех других скриптов, но ДО </body> -->
+<script>
+  // Проверка темного режима при загрузке
+  if (localStorage.getItem('darkMode') === 'true') {
+    document.body.classList.add('night-mode');
+  }
+</script>
 <script>
   document.getElementById('main-content').classList.add('loaded');
 </script>
