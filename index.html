@@ -162,5 +162,10 @@
         loadPrayerTimes();
         setInterval(checkCurrentPrayer, 60000);
     </script>
+    <!-- После всех других скриптов, но ДО </body> -->
+<script>
+  document.getElementById('main-content').classList.add('loaded');
+</script>
+</body>
 </body>
 </html>
