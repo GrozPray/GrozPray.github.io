@@ -90,3 +90,22 @@
         font-size: 1.7em;
     }
 }
+.dhikr-list {
+  transition: opacity 0.2s ease;
+}
+
+.dhikr-categories {
+  transition: all 0.3s ease;
+}
+
+.category-btn {
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.category-btn:hover {
+  transform: scale(1.05);
+}
+
+.category-btn.active {
+  transform: scale(1.08);
+}
