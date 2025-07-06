@@ -7,28 +7,6 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Open+Sans:wght@400;600&display=swap">
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/dhikr.css">
-    <style>
-        .main-content {
-            opacity: 0;
-            transform: translateY(10px);
-            transition: opacity 0.4s ease, transform 0.4s ease;
-        }
-        .main-content.loaded {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .dhikr-list {
-            transition: opacity 0.3s ease;
-        }
-        .dhikr-item {
-            transition: opacity 0.3s ease, transform 0.3s ease;
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        .category-btn {
-            transition: all 0.2s ease;
-        }
-    </style>
 </head>
 <body>
     <div class="container">
@@ -41,16 +19,14 @@
             <a href="index.html">🕋 Намаз</a>
             <a href="quran.html">📖 Коран</a>
             <a href="dhikr.html" class="active">📿 Зикры</a>
-            <a href="settings.html">⚙️ Настройки</a>
         </nav>
 
-        <main class="main-content" id="main-content">
+        <main>
             <section class="card">
                 <div class="dhikr-categories">
                     <button class="category-btn active" data-category="morning">Утренние</button>
                     <button class="category-btn" data-category="evening">Вечерние</button>
                     <button class="category-btn" data-category="after-prayer">После намаза</button>
-                    <button class="category-btn" data-category="sleep">Перед сном</button>
                 </div>
 
                 <div class="dhikr-list" id="dhikr-list">
@@ -65,146 +41,7 @@
     </div>
 
     <script>
-        // База данных зикров
         const dhikrData = {
             "morning": [
                 {
-                    "id": "morning-1",
-                    "arabic": "أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ",
-                    "translit": "Асбахна ва асбахаль-мульку лиллях",
-                    "meaning": "Мы дожили до утра, и власть принадлежит Аллаху"
-                },
-                {
-                    "id": "morning-2",
-                    "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
-                    "translit": "Субханаллахи ва бихамдих",
-                    "meaning": "Преславен Аллах и хвала Ему"
-                }
-            ],
-            "evening": [
-                {
-                    "id": "evening-1",
-                    "arabic": "أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ",
-                    "translit": "Амсайна ва амсаль-мульку лиллях",
-                    "meaning": "Мы дожили до вечера, и власть принадлежит Аллаху"
-                }
-            ],
-            "after-prayer": [
-                {
-                    "id": "after-1",
-                    "arabic": "أَسْتَغْفِرُ اللَّهَ",
-                    "translit": "Астагфируллах",
-                    "meaning": "Прошу прощения у Аллаха"
-                }
-            ],
-            "sleep": [
-                {
-                    "id": "sleep-1",
-                    "arabic": "بِاسْمِكَ رَبِّي وَضَعْتُ جَنْبِي",
-                    "translit": "Бисмика рабби вада'ту джанби",
-                    "meaning": "Именем Твоим, Господи, я ложусь"
-                }
-            ]
-        };
-
-        // Улучшенная загрузка зикров с анимацией
-        function loadDhikr(category) {
-            const dhikrList = document.getElementById('dhikr-list');
-            
-            // Плавное исчезновение
-            dhikrList.style.opacity = 0;
-            
-            setTimeout(() => {
-                dhikrList.innerHTML = '';
-                
-                dhikrData[category].forEach((dhikr, index) => {
-                    const dhikrItem = document.createElement('div');
-                    dhikrItem.className = 'dhikr-item';
-                    
-                    // Восстанавливаем счетчик из localStorage
-                    const savedCount = localStorage.getItem(`count_${dhikr.id}`) || 0;
-                    
-                    dhikrItem.innerHTML = `
-                        <div class="dhikr-arabic" dir="rtl" lang="ar">${dhikr.arabic}</div>
-                        <div class="dhikr-translit">${dhikr.translit}</div>
-                        <div class="dhikr-meaning">${dhikr.meaning}</div>
-                        <div class="counter">
-                            <button class="counter-btn minus">−</button>
-                            <span class="count">${savedCount}</span>
-                            <button class="counter-btn plus">+</button>
-                            <span class="times">раз</span>
-                        </div>
-                    `;
-                    
-                    dhikrList.appendChild(dhikrItem);
-                    
-                    // Плавное появление с задержкой
-                    setTimeout(() => {
-                        dhikrItem.style.opacity = 1;
-                        dhikrItem.style.transform = 'translateY(0)';
-                    }, 100 * index);
-                });
-                
-                dhikrList.style.opacity = 1;
-                initCounters();
-            }, 300);
-        }
-
-        // Инициализация счетчиков с сохранением
-        function initCounters() {
-            document.querySelectorAll('.counter-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const counter = this.parentElement.querySelector('.count');
-                    let count = parseInt(counter.textContent);
-                    
-                    if (this.classList.contains('plus')) {
-                        count++;
-                    } else if (count > 0) {
-                        count--;
-                    }
-                    
-                    counter.textContent = count;
-                    
-                    // Сохраняем в localStorage с префиксом count_
-                    const dhikrId = this.closest('.dhikr-item').querySelector('.dhikr-arabic').textContent.trim();
-                    const dhikr = Object.values(dhikrData).flat().find(d => d.arabic === dhikrId);
-                    
-                    if (dhikr && dhikr.id) {
-                        localStorage.setItem(`count_${dhikr.id}`, count);
-                    }
-                });
-            });
-        }
-
-        // Обработчики кнопок категорий с анимацией
-        document.querySelectorAll('.category-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                loadDhikr(this.dataset.category);
-            });
-        });
-
-        // Инициализация при загрузке
-        window.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('main-content').classList.add('loaded');
-            loadDhikr('morning');
-            
-            // Проверка темного режима
-            if (localStorage.getItem('darkMode') === 'true') {
-                document.body.classList.add('night-mode');
-            }
-            
-            // Обработчик сообщений от страницы настроек
-            window.addEventListener('storage', (event) => {
-                if (event.key === 'reset_counters') {
-                    const activeCategory = document.querySelector('.category-btn.active')?.dataset.category;
-                    if (activeCategory) {
-                        loadDhikr(activeCategory);
-                    }
-                }
-            });
-        });
-    </script>
-</body>
-</html>
+                    "arabic": "أَصْبَحْنَا وَ
