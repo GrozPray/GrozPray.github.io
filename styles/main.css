@@ -4,6 +4,15 @@
     --dark: #1A3A2F;
     --light: #F5F5F5;
     --text: #333;
+    --card-bg: #FFFFFF;
+    --nav-bg: #FFFFFF;
+    --footer-text: #666666;
+    
+    /* Темный режим переменные */
+    --dark-bg: #121212;
+    --dark-card: #1E1E1E;
+    --dark-text: #E0E0E0;
+    --dark-nav: #2A2A2A;
 }
 
 body {
@@ -13,6 +22,18 @@ body {
     margin: 0;
     padding: 0;
     line-height: 1.6;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Ночной режим */
+body.night-mode {
+    background-color: var(--dark-bg);
+    color: var(--dark-text);
+    
+    --card-bg: var(--dark-card);
+    --text: var(--dark-text);
+    --nav-bg: var(--dark-nav);
+    --footer-text: #AAAAAA;
 }
 
 .container {
@@ -29,22 +50,18 @@ header {
     color: white;
     border-radius: 10px;
     margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
 }
 
-.logo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-}
-
-.logo-img {
-    border-radius: 50%;
-}
-
-.slogan {
-    font-style: italic;
-    opacity: 0.9;
+header::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--secondary);
 }
 
 /* Навигация */
@@ -61,215 +78,192 @@ nav a {
     text-decoration: none;
     padding: 10px 20px;
     border-radius: 50px;
-    background: white;
+    background: var(--nav-bg);
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    transition: all 0.3s;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-nav a.active, nav a:hover {
+nav a.active, 
+nav a:hover {
     background: var(--primary);
     color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 /* Карточки */
 .card {
-    background: white;
+    background: var(--card-bg);
     border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 20px;
+    padding: 25px;
+    margin-bottom: 25px;
     box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+/* Анимации */
+.main-content {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.main-content.loaded {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+    animation: fadeIn 0.6s ease forwards;
 }
 
 /* Стили для страницы намаза */
 .prayer-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 20px;
 }
 
 .prayer-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 15px;
-    background: #F8F9FA;
-    border-radius: 8px;
-    transition: all 0.3s;
+    padding: 20px;
+    background: rgba(248, 249, 250, 0.7);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.prayer-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
 .prayer-item.current-prayer {
-    background: rgba(46, 139, 87, 0.2);
+    background: rgba(46, 139, 87, 0.15);
     border: 2px solid var(--primary);
+    animation: pulse 2s infinite;
 }
 
-.prayer-name {
-    font-weight: 600;
-    color: var(--primary);
-}
-
-.prayer-time {
-    font-size: 1.2em;
-    font-weight: bold;
-}
-
-/* Стили для страницы Корана */
-.sura-list {
-    margin-top: 20px;
-}
-
-.sura-item {
-    margin-bottom: 30px;
-    direction: rtl;
-}
-
-.sura-header {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    cursor: pointer;
-    background: #f9f9f9;
-    border-radius: 5px;
-    margin-bottom: 10px;
-}
-
-.sura-number {
-    font-weight: bold;
-    color: var(--primary);
-    margin-left: 10px;
-}
-
-.sura-name-arabic {
-    font-family: 'Amiri', serif;
-    font-size: 1.8em;
-    margin-right: 15px;
-}
-
-.sura-name {
-    flex-grow: 1;
-    font-weight: 600;
-    text-align: right;
-}
-
-.ayah {
-    font-family: 'Amiri', serif;
-    font-size: 2em;
-    line-height: 2;
-    text-align: right;
-    margin: 15px 0;
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(46, 139, 87, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(46, 139, 87, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(46, 139, 87, 0); }
 }
 
 /* Стили для страницы зикров */
-.dhikr-item {
-    padding: 15px;
-    margin: 10px 0;
-    background: #f8f9fa;
-    border-radius: 8px;
+.dhikr-categories {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
-.dhikr-arabic {
-    font-family: 'Amiri', serif;
-    font-size: 1.8em;
-    text-align: right;
+.category-btn {
+    padding: 10px 20px;
+    border: none;
+    background: #f0f0f0;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.category-btn.active, 
+.category-btn:hover {
+    background: var(--primary);
+    color: white;
+    transform: scale(1.05);
+}
+
+.dhikr-item {
+    padding: 20px;
+    margin: 15px 0;
+    background: rgba(248, 249, 250, 0.7);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.dhikr-item:nth-child(1) { animation-delay: 0.1s; }
+.dhikr-item:nth-child(2) { animation-delay: 0.2s; }
+.dhikr-item:nth-child(3) { animation-delay: 0.3s; }
+
+.counter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.counter-btn {
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.counter-btn:active {
+    transform: scale(0.9);
 }
 
 /* Подвал */
 footer {
     text-align: center;
-    padding: 20px;
-    margin-top: 40px;
-    color: #666;
+    padding: 30px 20px;
+    margin-top: 50px;
+    color: var(--footer-text);
+    border-top: 1px solid rgba(0,0,0,0.1);
 }
 
 /* Адаптивность */
 @media (max-width: 768px) {
     .prayer-grid {
         grid-template-columns: 1fr 1fr;
+        gap: 15px;
     }
     
-    .sura-name-arabic {
-        font-size: 1.5em;
+    .card {
+        padding: 20px;
     }
     
-    .ayah {
-        font-size: 1.7em;
+    .dhikr-item {
+        padding: 15px;
     }
 }
 
 @media (max-width: 480px) {
-    nav {
-        flex-direction: column;
-        align-items: center;
-    }
-    
     nav a {
-        width: 80%;
-        text-align: center;
+        width: 100%;
+        justify-content: center;
     }
     
-    .sura-header {
-        flex-direction: column;
-        text-align: center;
+    .prayer-grid {
+        grid-template-columns: 1fr;
     }
     
-    .sura-name-arabic {
-        margin: 10px 0;
-        font-size: 1.8em;
+    .prayer-item, 
+    .dhikr-item {
+        padding: 15px 10px;
     }
     
-    .ayah {
-        font-size: 1.5em;
+    .counter {
+        gap: 5px;
     }
-}
-/* Анимация перехода между страницами */
-.main-content {
-  opacity: 0;
-  transform: translateY(10px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.main-content.loaded {
-  opacity: 1;
-  transform: translateY(0);
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.card {
-  animation: fadeIn 0.6s ease forwards;
-}
-
-nav a {
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-nav a:hover {
-  transform: translateY(-2px);
-}
-/* Ночной режим */
-.night-mode {
-    background-color: #121212;
-    color: #e0e0e0;
-}
-.night-mode .card {
-    background-color: #1e1e1e;
-}
-.night-mode .dhikr-item,
-.night-mode .settings-item {
-    background-color: #2a2a2a !important;
-}
-
-/* Кнопка сброса */
-.reset-btn {
-    background: #f44336;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-.reset-btn:hover {
-    background: #d32f2f;
 }
