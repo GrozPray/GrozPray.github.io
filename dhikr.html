@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/dhikr.css">
     <style>
-        /* Добавляем анимации */
         .main-content {
             opacity: 0;
             transform: translateY(10px);
@@ -123,7 +122,7 @@
                     dhikrItem.className = 'dhikr-item';
                     
                     // Восстанавливаем счетчик из localStorage
-                    const savedCount = localStorage.getItem(dhikr.id) || 0;
+                    const savedCount = localStorage.getItem(`count_${dhikr.id}`) || 0;
                     
                     dhikrItem.innerHTML = `
                         <div class="dhikr-arabic" dir="rtl" lang="ar">${dhikr.arabic}</div>
@@ -166,14 +165,12 @@
                     
                     counter.textContent = count;
                     
-                    // Сохраняем в localStorage
+                    // Сохраняем в localStorage с префиксом count_
                     const dhikrId = this.closest('.dhikr-item').querySelector('.dhikr-arabic').textContent.trim();
-                    const storageKey = Object.values(dhikrData)
-                        .flat()
-                        .find(d => d.arabic === dhikrId)?.id;
+                    const dhikr = Object.values(dhikrData).flat().find(d => d.arabic === dhikrId);
                     
-                    if (storageKey) {
-                        localStorage.setItem(storageKey, count);
+                    if (dhikr && dhikr.id) {
+                        localStorage.setItem(`count_${dhikr.id}`, count);
                     }
                 });
             });
@@ -192,13 +189,22 @@
         window.addEventListener('DOMContentLoaded', () => {
             document.getElementById('main-content').classList.add('loaded');
             loadDhikr('morning');
+            
+            // Проверка темного режима
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('night-mode');
+            }
+            
+            // Обработчик сообщений от страницы настроек
+            window.addEventListener('storage', (event) => {
+                if (event.key === 'reset_counters') {
+                    const activeCategory = document.querySelector('.category-btn.active')?.dataset.category;
+                    if (activeCategory) {
+                        loadDhikr(activeCategory);
+                    }
+                }
+            });
         });
     </script>
-    <script>
-  // Проверка темного режима при загрузке
-  if (localStorage.getItem('darkMode') === 'true') {
-    document.body.classList.add('night-mode');
-  }
-</script>
 </body>
 </html>
