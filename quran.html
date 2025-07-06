@@ -7,12 +7,128 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Open+Sans:wght@400;600&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/quran.css">
+    <style>
+        /* Дополнительные стили для страницы Корана */
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 12px 20px 12px 45px;
+            border-radius: 50px;
+            border: 2px solid var(--primary);
+            font-size: 1em;
+            background-color: white;
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+        }
+        
+        .sura-list {
+            margin-top: 20px;
+        }
+        
+        .sura-item {
+            margin-bottom: 10px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .sura-header {
+            padding: 15px;
+            background-color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .sura-header:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .sura-number {
+            background-color: var(--primary);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+        
+        .sura-name {
+            flex-grow: 1;
+            font-weight: 600;
+        }
+        
+        .sura-name-arabic {
+            font-family: 'Amiri', serif;
+            font-size: 1.3em;
+            margin-left: 10px;
+            color: var(--dark);
+        }
+        
+        .sura-content {
+            padding: 15px;
+            background-color: #f8f9fa;
+            display: none;
+        }
+        
+        .sura-content.show {
+            display: block;
+        }
+        
+        .ayah {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .arabic-text {
+            font-family: 'Amiri', serif;
+            font-size: 1.8em;
+            text-align: right;
+            line-height: 2;
+            direction: rtl;
+        }
+        
+        .translation {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: white;
+            border-radius: 8px;
+        }
+        
+        .ayah-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>GrozPray</h1>
+            <p class="slogan">Коран - руководство для верующих</p>
         </header>
         
         <nav>
@@ -21,42 +137,16 @@
             <a href="dhikr.html">📿 Зикры</a>
         </nav>
 
-        <main>
+        <main class="main-content">
             <section class="card">
-                <div class="sura-selector">
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="sura-search" placeholder="Поиск суры..." autocomplete="off">
-                    </div>
-                    
-                    <div class="selected-sura" id="selected-sura">
-                        <div class="sura-number" id="selected-sura-number">1</div>
-                        <div class="selected-sura-info">
-                            <div id="selected-sura-name">Al-Fatihah</div>
-                            <div class="sura-name-arabic" id="selected-sura-name-arabic">الفاتحة</div>
-                        </div>
-                        <div class="close-selected" onclick="clearSelection()">
-                            <i class="fas fa-times"></i>
-                        </div>
-                    </div>
-                    
-                    <div class="sura-dropdown" id="sura-dropdown">
-                        <div class="sura-group">
-                            <div class="sura-group-title">Мекканские суры</div>
-                            <div id="meccan-suras"></div>
-                        </div>
-                        <div class="sura-group">
-                            <div class="sura-group-title">Мединские суры</div>
-                            <div id="medinan-suras"></div>
-                        </div>
-                    </div>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="sura-search" placeholder="Поиск суры..." autocomplete="off">
                 </div>
-
-                <div id="quran-container">
-                    <div class="sura-title">
-                        <h2>Выберите суру</h2>
-                        <p>Начните вводить название суры в поле поиска выше</p>
-                    </div>
+                
+                <div class="sura-list" id="sura-list">
+                    <!-- Список сур будет загружен здесь -->
+                    <div class="loader">Загрузка списка сур...</div>
                 </div>
             </section>
         </main>
@@ -77,20 +167,18 @@
 
         // Загрузка списка сур при открытии страницы
         document.addEventListener('DOMContentLoaded', function() {
+            // Анимация загрузки контента
+            document.querySelector('.main-content').classList.add('loaded');
+            
             fetch('https://api.alquran.cloud/v1/surah')
                 .then(response => response.json())
                 .then(data => {
                     allSuras = data.data;
                     renderSuraList(allSuras);
-                    
-                    // Показать первую суру по умолчанию
-                    if (allSuras.length > 0) {
-                        selectSura(allSuras[0]);
-                    }
                 })
                 .catch(error => {
                     console.error('Ошибка загрузки списка сур:', error);
-                    document.getElementById('quran-container').innerHTML = `
+                    document.getElementById('sura-list').innerHTML = `
                         <div class="error">
                             Ошибка загрузки списка сур. Пожалуйста, попробуйте позже.
                             <button onclick="location.reload()">⟳ Обновить</button>
@@ -99,95 +187,78 @@
                 });
         });
 
-        // Рендер списка сур с группировкой
+        // Рендер списка сур
         function renderSuraList(suras) {
-            const meccanSuras = suras.filter(sura => sura.revelationType === 'Meccan');
-            const medinanSuras = suras.filter(sura => sura.revelationType === 'Medinan');
-            
-            renderSuraGroup('meccan-suras', meccanSuras);
-            renderSuraGroup('medinan-suras', medinanSuras);
-        }
-
-        function renderSuraGroup(containerId, suras) {
-            const container = document.getElementById(containerId);
+            const container = document.getElementById('sura-list');
             container.innerHTML = '';
             
             suras.forEach(sura => {
                 const suraItem = document.createElement('div');
                 suraItem.className = 'sura-item';
                 suraItem.innerHTML = `
-                    <div class="sura-number">${sura.number}</div>
-                    <div class="sura-name">${sura.englishName}</div>
-                    <div class="sura-name-arabic">${sura.name}</div>
+                    <div class="sura-header" onclick="toggleSura(this, ${sura.number})">
+                        <div style="display: flex; align-items: center;">
+                            <div class="sura-number">${sura.number}</div>
+                            <div class="sura-name">${sura.englishName}</div>
+                            <div class="sura-name-arabic">${sura.name}</div>
+                        </div>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="sura-content" id="sura-content-${sura.number}"></div>
                 `;
-                suraItem.addEventListener('click', () => selectSura(sura));
                 container.appendChild(suraItem);
             });
-        }
-
-        // Выбор суры
-        function selectSura(sura) {
-            // Обновить выбранную суру
-            document.getElementById('selected-sura-number').textContent = sura.number;
-            document.getElementById('selected-sura-name').textContent = sura.englishName;
-            document.getElementById('selected-sura-name-arabic').textContent = sura.name;
-            document.getElementById('selected-sura').classList.add('show');
-            
-            // Закрыть dropdown
-            document.getElementById('sura-dropdown').classList.remove('show');
-            
-            // Загрузить суру
-            loadSura(sura.number);
-        }
-
-        function clearSelection() {
-            document.getElementById('selected-sura').classList.remove('show');
-            document.getElementById('quran-container').innerHTML = `
-                <div class="sura-title">
-                    <h2>Выберите суру</h2>
-                    <p>Начните вводить название суры в поле поиска выше</p>
-                </div>
-            `;
         }
 
         // Поиск сур
         document.getElementById('sura-search').addEventListener('input', function() {
             const searchTerm = this.value.toLowerCase();
-            const dropdown = document.getElementById('sura-dropdown');
+            const filtered = allSuras.filter(sura => 
+                sura.englishName.toLowerCase().includes(searchTerm) || 
+                sura.name.toLowerCase().includes(searchTerm) ||
+                sura.englishNameTranslation.toLowerCase().includes(searchTerm)
+            );
             
-            if (searchTerm.length > 0) {
-                const filtered = allSuras.filter(sura => 
-                    sura.englishName.toLowerCase().includes(searchTerm) || 
-                    sura.name.toLowerCase().includes(searchTerm) ||
-                    sura.englishNameTranslation.toLowerCase().includes(searchTerm)
-                );
-                
-                renderSuraList(filtered);
-                dropdown.classList.add('show');
+            renderSuraList(filtered);
+        });
+
+        // Открытие/закрытие суры
+        function toggleSura(header, suraNumber) {
+            const content = document.getElementById(`sura-content-${suraNumber}`);
+            const icon = header.querySelector('i');
+            
+            if (content.classList.contains('show')) {
+                content.classList.remove('show');
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
             } else {
-                renderSuraList(allSuras);
-                dropdown.classList.remove('show');
+                // Закрываем все открытые суры
+                document.querySelectorAll('.sura-content.show').forEach(el => {
+                    el.classList.remove('show');
+                    el.previousElementSibling.querySelector('i').classList.remove('fa-chevron-up');
+                    el.previousElementSibling.querySelector('i').classList.add('fa-chevron-down');
+                });
+                
+                // Открываем выбранную
+                content.classList.add('show');
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+                
+                // Загружаем содержимое если еще не загружено
+                if (content.innerHTML === '') {
+                    loadSuraContent(suraNumber, content);
+                }
             }
-        });
+        }
 
-        // Клик вне dropdown закрывает его
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.sura-selector')) {
-                document.getElementById('sura-dropdown').classList.remove('show');
-            }
-        });
-
-        // Загрузка текста суры с переводом
-        async function loadSura(suraNumber) {
-            if (!suraNumber) return;
+        // Загрузка содержимого суры
+        async function loadSuraContent(suraNumber, container) {
+            container.innerHTML = '<div style="padding: 15px; text-align: center;">Загрузка...</div>';
             
-            const container = document.getElementById('quran-container');
-            container.innerHTML = '<div class="loader">Загрузка суры...</div>';
-
             try {
                 // Используем кэш если есть
                 if (suraCache[suraNumber]) {
-                    renderSura(suraCache[suraNumber]);
+                    renderSuraContent(suraCache[suraNumber], container);
                     return;
                 }
                 
@@ -203,28 +274,24 @@
                 // Сохраняем в кэш
                 suraCache[suraNumber] = { arabicData, translationData };
                 
-                renderSura({ arabicData, translationData });
+                renderSuraContent({ arabicData, translationData }, container);
             } catch (error) {
                 container.innerHTML = `
-                    <div class="error">
+                    <div style="padding: 15px; color: red;">
                         Ошибка загрузки. Пожалуйста, попробуйте позже.
-                        <button onclick="loadSura(${suraNumber})">⟳ Повторить</button>
+                        <button onclick="loadSuraContent(${suraNumber}, this.parentElement)">⟳ Повторить</button>
                     </div>
                 `;
                 console.error('Ошибка загрузки суры:', error);
             }
         }
 
-        function renderSura({ arabicData, translationData }) {
-            const container = document.getElementById('quran-container');
-            
+        function renderSuraContent({ arabicData, translationData }, container) {
             let html = `
-                <div class="sura-title">
-                    <h2>${arabicData.data.englishName}</h2>
-                    <div class="sura-name-arabic">${arabicData.data.name}</div>
-                    <p>${arabicData.data.englishNameTranslation} • ${arabicData.data.numberOfAyahs} аятов • ${arabicData.data.revelationType === 'Meccan' ? 'Мекканская' : 'Мединская'}</p>
+                <div style="padding: 15px; background: white; border-bottom: 1px solid #eee;">
+                    <h3>${arabicData.data.englishName} (${arabicData.data.name})</h3>
+                    <p>${arabicData.data.englishNameTranslation} • ${arabicData.data.numberOfAyahs} аятов</p>
                 </div>
-                <div class="sura-text">
             `;
 
             arabicData.data.ayahs.forEach((ayah, index) => {
@@ -236,7 +303,7 @@
                 `;
             });
 
-            container.innerHTML = html + '</div>';
+            container.innerHTML = html;
         }
     </script>
 </body>
