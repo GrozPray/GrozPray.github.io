@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GrozPray - Время намаза</title>
+    <title>GrozPray - Время намаза в Грозном</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Open+Sans:wght@400;600&display=swap">
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/index.css">
@@ -11,7 +11,8 @@
 <body>
     <div class="container">
         <header>
-            <h1>GrozPray</h1>
+                <h1>GrozPray</h1>
+            </div>
             <p class="slogan">Ваш помощник в поклонении</p>
         </header>
         
@@ -66,41 +67,136 @@
                 document.getElementById('maghrib').textContent = timings.Maghrib;
                 document.getElementById('isha').textContent = timings.Isha;
                 
-                checkCurrentPrayer();
-                setInterval(checkCurrentPrayer, 60000);
+                // Сохраняем время намазов для дальнейшего использования
+                window.prayerTimes = {
+                    fajr: timings.Fajr,
+                    dhuhr: timings.Dhuhr,
+                    asr: timings.Asr,
+                    maghrib: timings.Maghrib,
+                    isha: timings.Isha
+                };
+                
+                checkCurrentPrayer(); // Первая проверка
+                setInterval(checkCurrentPrayer, 30000); // Проверка каждые 30 сек
             });
 
+        // Функция для преобразования времени в минуты
+        function timeToMinutes(timeStr) {
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            return hours * 60 + minutes;
+        }
+
+        // Проверка текущего намаза
         function checkCurrentPrayer() {
             const now = new Date();
-            const currentTime = formatTime(now.getHours(), now.getMinutes());
+            const currentHours = now.getHours();
+            const currentMinutes = now.getMinutes();
+            const currentTimeInMinutes = currentHours * 60 + currentMinutes;
             
+            // Получаем время намазов в минутах
+            const prayerTimesInMinutes = {};
+            for (const [prayer, time] of Object.entries(window.prayerTimes)) {
+                prayerTimesInMinutes[prayer] = timeToMinutes(time);
+            }
+            
+            // Определяем порядок намазов
+            const prayerOrder = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+            
+            // Сбрасываем все подсветки
             document.querySelectorAll('.prayer-item').forEach(item => {
                 item.classList.remove('current-prayer');
             });
-
-            const prayers = {
-                'fajr': document.getElementById('fajr').textContent,
-                'dhuhr': document.getElementById('dhuhr').textContent,
-                'asr': document.getElementById('asr').textContent,
-                'maghrib': document.getElementById('maghrib').textContent,
-                'isha': document.getElementById('isha').textContent
-            };
-
-            for (const [prayer, time] of Object.entries(prayers)) {
-                if (time === currentTime) {
-                    document.getElementById(`${prayer}-card`).classList.add('current-prayer');
+            
+            // Определяем текущий намаз
+            let currentPrayer = null;
+            
+            // Проверяем промежутки между намазами
+            for (let i = 0; i < prayerOrder.length; i++) {
+                const current = prayerOrder[i];
+                const next = prayerOrder[(i + 1) % prayerOrder.length];
+                
+                // Для Иша учитываем, что следующий намаз - Фаджр следующего дня
+                if (current === 'isha') {
+                    if (currentTimeInMinutes >= prayerTimesInMinutes['isha'] || 
+                        currentTimeInMinutes < prayerTimesInMinutes['fajr']) {
+                        currentPrayer = 'isha';
+                        break;
+                    }
+                } else {
+                    if (currentTimeInMinutes >= prayerTimesInMinutes[current] && 
+                        currentTimeInMinutes < prayerTimesInMinutes[next]) {
+                        currentPrayer = current;
+                        break;
+                    }
                 }
+            }
+            
+            // Если нашли текущий намаз - подсвечиваем его
+            if (currentPrayer) {
+                document.getElementById(`${currentPrayer}-card`).classList.add('current-prayer');
+                console.log(`Текущий намаз: ${currentPrayer}`);
             }
         }
 
-        function formatTime(h, m) {
-            return `${h}:${m < 10 ? '0'+m : m}`;
+        // Запросить разрешение на уведомления
+        Notification.requestPermission().then(permission => {
+            if (permission !== "granted") {
+                console.log("Уведомления не разрешены пользователем");
+                return;
+            }
+
+            // Получить время намаза для Грозного
+            fetch("https://api.aladhan.com/v1/timingsByCity?city=Grozny&country=Russia&method=2")
+                .then(response => response.json())
+                .then(data => {
+                    const timings = data.data.timings;
+                    
+                    // Создаем уведомления для каждого намаза
+                    Object.entries(timings).forEach(([prayerName, prayerTime]) => {
+                        if (['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'].includes(prayerName)) {
+                            scheduleNotification(prayerName, prayerTime);
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error("Не удалось получить время намаза:", error);
+                });
+        });
+
+        function scheduleNotification(prayerName, prayerTime) {
+            const now = new Date();
+            const prayerDate = new Date(now);
+            const [hours, minutes] = prayerTime.split(':');
+            
+            prayerDate.setHours(parseInt(hours, 10));
+            prayerDate.setMinutes(parseInt(minutes, 10));
+            prayerDate.setSeconds(0);
+            
+            // Если время намаза уже прошло сегодня, планируем на завтра
+            if (prayerDate < now) {
+                prayerDate.setDate(prayerDate.getDate() + 1);
+            }
+            
+            const delay = prayerDate - now;
+            
+            setTimeout(() => {
+                const prayerNames = {
+                    'Fajr': 'Фаджр',
+                    'Dhuhr': 'Зухр',
+                    'Asr': 'Аср',
+                    'Maghrib': 'Магриб',
+                    'Isha': 'Иша'
+                };
+                
+                new Notification("Время намаза!", {
+                    body: `Сейчас время ${prayerNames[prayerName]}: ${prayerTime}. Пора совершить намаз 🙏`,
+                    icon: "images/logo.png"
+                });
+                
+                // Планируем следующее уведомление на завтра
+                scheduleNotification(prayerName, prayerTime);
+            }, delay);
         }
-    </script>
-    <main class="main-content" id="main-content">
-        <script>
-          // В конце body каждого файла
-          document.getElementById('main-content').classList.add('loaded');
     </script>
 </body>
 </html>
