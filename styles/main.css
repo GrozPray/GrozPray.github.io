@@ -54,16 +54,6 @@ header {
     overflow: hidden;
 }
 
-header::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: var(--secondary);
-}
-
 /* Навигация */
 nav {
     display: flex;
