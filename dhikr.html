@@ -7,11 +7,35 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Open+Sans:wght@400;600&display=swap">
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/dhikr.css">
+    <style>
+        /* Добавляем анимации */
+        .main-content {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        .main-content.loaded {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .dhikr-list {
+            transition: opacity 0.3s ease;
+        }
+        .dhikr-item {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        .category-btn {
+            transition: all 0.2s ease;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>GrozPray</h1>
+            <p class="slogan">Ваш помощник в поклонении</p>
         </header>
         
         <nav>
@@ -20,7 +44,7 @@
             <a href="dhikr.html" class="active">📿 Зикры</a>
         </nav>
 
-        <main>
+        <main class="main-content" id="main-content">
             <section class="card">
                 <div class="dhikr-categories">
                     <button class="category-btn active" data-category="morning">Утренние</button>
@@ -36,94 +60,97 @@
         </main>
 
         <footer>
-            <p>© 2024 GrozPray</p>
+            <p>© 2024 GrozPray | Сделано для мусульман</p>
         </footer>
     </div>
 
     <script>
-        // База данных зикров (без ограничений по количеству)
+        // База данных зикров
         const dhikrData = {
             "morning": [
                 {
+                    "id": "morning-1",
                     "arabic": "أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ",
                     "translit": "Асбахна ва асбахаль-мульку лиллях",
                     "meaning": "Мы дожили до утра, и власть принадлежит Аллаху"
                 },
                 {
+                    "id": "morning-2",
                     "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
                     "translit": "Субханаллахи ва бихамдих",
                     "meaning": "Преславен Аллах и хвала Ему"
-                },
-                {
-                    "arabic": "اللَّهُ أَكْبَرُ",
-                    "translit": "Аллаху акбар",
-                    "meaning": "Аллах Велик"
                 }
             ],
             "evening": [
                 {
+                    "id": "evening-1",
                     "arabic": "أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ",
                     "translit": "Амсайна ва амсаль-мульку лиллях",
                     "meaning": "Мы дожили до вечера, и власть принадлежит Аллаху"
-                },
-                {
-                    "arabic": "سُبْحَانَ اللَّهِ",
-                    "translit": "Субханаллах",
-                    "meaning": "Преславен Аллах"
                 }
             ],
             "after-prayer": [
                 {
+                    "id": "after-1",
                     "arabic": "أَسْتَغْفِرُ اللَّهَ",
                     "translit": "Астагфируллах",
                     "meaning": "Прошу прощения у Аллаха"
-                },
-                {
-                    "arabic": "لَا إِلَهَ إِلَّا اللَّهُ",
-                    "translit": "Ля иляха илляллах",
-                    "meaning": "Нет божества, кроме Аллаха"
                 }
             ],
             "sleep": [
                 {
+                    "id": "sleep-1",
                     "arabic": "بِاسْمِكَ رَبِّي وَضَعْتُ جَنْبِي",
                     "translit": "Бисмика рабби вада'ту джанби",
                     "meaning": "Именем Твоим, Господи, я ложусь"
-                },
-                {
-                    "arabic": "الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنَا وَسَقَانَا",
-                    "translit": "Альхамдулилляхи аллязи ат'амана ва сакана",
-                    "meaning": "Хвала Аллаху, Который накормил и напоил нас"
                 }
             ]
         };
 
-        // Загрузка зикров по категории
+        // Улучшенная загрузка зикров с анимацией
         function loadDhikr(category) {
             const dhikrList = document.getElementById('dhikr-list');
-            dhikrList.innerHTML = '';
-
-            dhikrData[category].forEach(dhikr => {
-                const dhikrItem = document.createElement('div');
-                dhikrItem.className = 'dhikr-item';
-                dhikrItem.innerHTML = `
-                    <div class="dhikr-arabic" dir="rtl" lang="ar">${dhikr.arabic}</div>
-                    <div class="dhikr-translit">${dhikr.translit}</div>
-                    <div class="dhikr-meaning">${dhikr.meaning}</div>
-                    <div class="counter">
-                        <button class="counter-btn minus">−</button>
-                        <span class="count">0</span>
-                        <button class="counter-btn plus">+</button>
-                        <span class="times">раз</span>
-                    </div>
-                `;
-                dhikrList.appendChild(dhikrItem);
-            });
-
-            initCounters();
+            
+            // Плавное исчезновение
+            dhikrList.style.opacity = 0;
+            
+            setTimeout(() => {
+                dhikrList.innerHTML = '';
+                
+                dhikrData[category].forEach((dhikr, index) => {
+                    const dhikrItem = document.createElement('div');
+                    dhikrItem.className = 'dhikr-item';
+                    
+                    // Восстанавливаем счетчик из localStorage
+                    const savedCount = localStorage.getItem(dhikr.id) || 0;
+                    
+                    dhikrItem.innerHTML = `
+                        <div class="dhikr-arabic" dir="rtl" lang="ar">${dhikr.arabic}</div>
+                        <div class="dhikr-translit">${dhikr.translit}</div>
+                        <div class="dhikr-meaning">${dhikr.meaning}</div>
+                        <div class="counter">
+                            <button class="counter-btn minus">−</button>
+                            <span class="count">${savedCount}</span>
+                            <button class="counter-btn plus">+</button>
+                            <span class="times">раз</span>
+                        </div>
+                    `;
+                    
+                    dhikrList.appendChild(dhikrItem);
+                    
+                    // Плавное появление с задержкой
+                    setTimeout(() => {
+                        dhikrItem.style.opacity = 1;
+                        dhikrItem.style.transform = 'translateY(0)';
+                    }, 100 * index);
+                });
+                
+                dhikrList.style.opacity = 1;
+                initCounters();
+            }, 300);
         }
 
-        // Инициализация счетчиков (без ограничений)
+        // Инициализация счетчиков с сохранением
         function initCounters() {
             document.querySelectorAll('.counter-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -137,11 +164,21 @@
                     }
                     
                     counter.textContent = count;
+                    
+                    // Сохраняем в localStorage
+                    const dhikrId = this.closest('.dhikr-item').querySelector('.dhikr-arabic').textContent.trim();
+                    const storageKey = Object.values(dhikrData)
+                        .flat()
+                        .find(d => d.arabic === dhikrId)?.id;
+                    
+                    if (storageKey) {
+                        localStorage.setItem(storageKey, count);
+                    }
                 });
             });
         }
 
-        // Обработчики кнопок категорий
+        // Обработчики кнопок категорий с анимацией
         document.querySelectorAll('.category-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
@@ -150,11 +187,11 @@
             });
         });
 
-        // Загружаем утренние зикры по умолчанию
-        window.onload = () => loadDhikr('morning');
+        // Инициализация при загрузке
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('main-content').classList.add('loaded');
+            loadDhikr('morning');
+        });
     </script>
-    <script>
-  document.getElementById('main-content').classList.add('loaded');
-</script>
 </body>
 </html>
