@@ -156,5 +156,11 @@
             }
         });
     </script>
+    <script>
+  // Проверка темного режима при загрузке
+  if (localStorage.getItem('darkMode') === 'true') {
+    document.body.classList.add('night-mode');
+  }
+</script>
 </body>
 </html>
